@@ -14,9 +14,8 @@ import {ApiActionType} from "./ApiActionType.js";
 export class ApiLoadAction extends DataStoreLoadAction {
 
   #getRequestConfig;
-  constructor(
-    getRequestConfig
-  ) {
+
+  constructor(getRequestConfig) {
     super();
     this.#getRequestConfig = getRequestConfig;
   }
@@ -24,7 +23,8 @@ export class ApiLoadAction extends DataStoreLoadAction {
   getRequestConfig(params){
     return this.#getRequestConfig(params);
   }
-  /**
+  
+	/**
    * @param params API request parameters
    * @param cacheKey
    * @param requestKey
@@ -32,7 +32,6 @@ export class ApiLoadAction extends DataStoreLoadAction {
   async fetch(params, cacheKey, requestKey){
 
     const queryConfig = this.#getRequestConfig(params);
-
 
     if(!queryConfig.headers){
       queryConfig.headers = {};
@@ -96,7 +95,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
 
     try {
 
-      //The replace call is a workaround for an issue with url strings containing double quotes"
+      //The replace call is a workaround for an issue with url strings containing double quotes.
       const response = await fetch(queryConfig.url.replace(/"/g, ""), {
         method: queryConfig.method ?? ApiActionType.GET,
         headers: queryConfig.headers,
@@ -118,10 +117,8 @@ export class ApiLoadAction extends DataStoreLoadAction {
         clearSessionStorage();
       }
       return { status: 200 };
-
     } catch (e) {
       return {errorMessage:e.message};
     }
   }
-
 }

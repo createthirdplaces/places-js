@@ -6,20 +6,18 @@ export class DataStore {
 
   static #storeCount = 0;
 
-  #isLoading = false;
-  #storeData = null;
   #componentSubscriptions = [];
-
+	#isLoading = false; 
   #loadAction;
   #requestStoreId;
+	#storeData = null;
 
   constructor(loadAction) {
     this.#loadAction = loadAction;
     this.#componentSubscriptions = [];
-
     this.#requestStoreId = `data-store-${DataStore.#storeCount}`;
-    sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
-
+    
+		sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
     DataStore.#storeCount++;
   }
 
@@ -44,7 +42,7 @@ export class DataStore {
    */
   updateStoreData(storeUpdates){
     this.#storeData = {...this.#storeData,...freezeState(storeUpdates)};
-    for(let i=0; i< this.#componentSubscriptions.length; i++){
+    for(let i = 0; i < this.#componentSubscriptions.length; i++){
       this.#componentSubscriptions[i].updateFromSubscribedStores();
     }
   }
@@ -62,59 +60,51 @@ export class DataStore {
 
     const self = this;
 
-    // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
+    // Do not make a data request if there is an active one in progress. The active one will push data to subscribed components.
     if(!this.#isLoading) {
       this.#isLoading = true;
 
       const requestConfig = this.#loadAction.getRequestConfig ? this.#loadAction.getRequestConfig(params) : {};
 
-      //Retrieve cached response if one exists.
-
       let response = null;
       let requestKey = null;
-      if(self.#requestStoreId || self.#requestStoreId.length > 0){
+      
+      // Retrieve cached response if one exists.
+			if(self.#requestStoreId || self.#requestStoreId.length > 0){
         requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
         response = getItemFromSessionStorage(this.#requestStoreId, requestKey);
       }
 
-      //A cached response does not exist.
+      // Make an API call if a cached response does not exist.
       if(response === null) {
-        //Disable rendering of component while data is being retrieved
+        //Replace component with loading indicator if one exists.
         for (let i = 0; i < self.#componentSubscriptions.length; i++) {
           self.#componentSubscriptions[i].lockComponent(self);
         }
-
         if (dataStore) {
           const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
           for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
             dataStoreSubscribedComponents[i].lockComponent(dataStore);
           }
         }
+        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey); 
+      } 
+      
+			self.#storeData = response;
+      self.#isLoading = false;
 
-        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey)
-        self.#storeData = response;
-
-        self.#isLoading = false;
-
-      } else {
-        self.#storeData = response;
-        self.#isLoading = false;
-
-      }
-
-      for(let i=0; i< self.#componentSubscriptions.length;i++){
+      for(let i = 0; i < self.#componentSubscriptions.length; i++){
         self.#componentSubscriptions[i].unlockComponent(self);
         self.#componentSubscriptions[i].updateFromSubscribedStores();
       }
 
       if(dataStore){
         const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
-        for(let i =0;i < dataStoreSubscribedComponents.length; i++){
+        for(let i = 0; i < dataStoreSubscribedComponents.length; i++){
           dataStoreSubscribedComponents[i].unlockComponent(dataStore);
         }
         dataStore.updateStoreData(response);
       }
-
       return response;
     }
   }
@@ -131,7 +121,7 @@ export class DataStore {
   subscribeComponent(component){
 
     let i = 0;
-    while(i<this.#componentSubscriptions.length){
+    while(i < this.#componentSubscriptions.length){
       if(this.#componentSubscriptions[i] === component){
         this.#componentSubscriptions = this.#componentSubscriptions.splice(i, 1);
         break;

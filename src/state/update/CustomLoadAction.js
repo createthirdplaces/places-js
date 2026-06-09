@@ -9,18 +9,14 @@ export class CustomLoadAction extends DataStoreLoadAction {
 
   #loadFunction;
 
-  constructor(
-    loadFunction
-  ) {
+  constructor(loadFunction) {
     super();
     this.#loadFunction = loadFunction;
   }
 
   async fetch(params) {
-
     return await this.#loadFunction(
       params,
     );
   }
-
 }

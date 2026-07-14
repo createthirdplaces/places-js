@@ -51,7 +51,7 @@ function freezeState(state){
 
 class DataStoreLoadAction {
   fetch(params, cacheKey){
-    throw new Error(`fetch(params, cacheKey) method must be defined for ${this.constructor.name}`);
+    throw new Error(`fetch(params, cacheKey) method must be defined for ${this.constructor.name}`)
   }
 }
 
@@ -59,18 +59,20 @@ class DataStore {
 
   static #storeCount = 0;
 
+  #isLoading = false;
+  #storeData = null;
   #componentSubscriptions = [];
-	#isLoading = false; 
+
   #loadAction;
   #requestStoreId;
-	#storeData = null;
 
   constructor(loadAction) {
     this.#loadAction = loadAction;
     this.#componentSubscriptions = [];
+
     this.#requestStoreId = `data-store-${DataStore.#storeCount}`;
-    
-		sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
+    sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
+
     DataStore.#storeCount++;
   }
 
@@ -85,7 +87,7 @@ class DataStore {
   /**
    * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
    */
-  hasLatestData() {
+  isWaitingForData() {
     return this.#storeData !== null && this.#storeData !== undefined  && !this.#isLoading;
   }
 
@@ -95,7 +97,7 @@ class DataStore {
    */
   updateStoreData(storeUpdates){
     this.#storeData = {...this.#storeData,...freezeState(storeUpdates)};
-    for(let i = 0; i < this.#componentSubscriptions.length; i++){
+    for(let i=0; i< this.#componentSubscriptions.length; i++){
       this.#componentSubscriptions[i].updateFromSubscribedStores();
     }
   }
@@ -113,51 +115,59 @@ class DataStore {
 
     const self = this;
 
-    // Do not make a data request if there is an active one in progress. The active one will push data to subscribed components.
+    // Do not make a data request if there is an active one in progress. It will push data to subscribed components.
     if(!this.#isLoading) {
       this.#isLoading = true;
 
       const requestConfig = this.#loadAction.getRequestConfig ? this.#loadAction.getRequestConfig(params) : {};
 
+      //Retrieve cached response if one exists.
+
       let response = null;
       let requestKey = null;
-      
-      // Retrieve cached response if one exists.
-			if(self.#requestStoreId || self.#requestStoreId.length > 0){
+      if(self.#requestStoreId || self.#requestStoreId.length > 0){
         requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
         response = getItemFromSessionStorage(this.#requestStoreId, requestKey);
       }
 
-      // Make an API call if a cached response does not exist.
+      //A cached response does not exist.
       if(response === null) {
-        //Replace component with loading indicator if one exists.
+        //Disable rendering of component while data is being retrieved
         for (let i = 0; i < self.#componentSubscriptions.length; i++) {
           self.#componentSubscriptions[i].lockComponent(self);
         }
+
         if (dataStore) {
           const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
           for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
             dataStoreSubscribedComponents[i].lockComponent(dataStore);
           }
         }
-        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey); 
-      } 
-      
-			self.#storeData = response;
-      self.#isLoading = false;
 
-      for(let i = 0; i < self.#componentSubscriptions.length; i++){
+        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey);
+        self.#storeData = response;
+
+        self.#isLoading = false;
+
+      } else {
+        self.#storeData = response;
+        self.#isLoading = false;
+
+      }
+
+      for(let i=0; i< self.#componentSubscriptions.length;i++){
         self.#componentSubscriptions[i].unlockComponent(self);
         self.#componentSubscriptions[i].updateFromSubscribedStores();
       }
 
       if(dataStore){
         const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
-        for(let i = 0; i < dataStoreSubscribedComponents.length; i++){
+        for(let i =0;i < dataStoreSubscribedComponents.length; i++){
           dataStoreSubscribedComponents[i].unlockComponent(dataStore);
         }
         dataStore.updateStoreData(response);
       }
+
       return response;
     }
   }
@@ -174,7 +184,7 @@ class DataStore {
   subscribeComponent(component){
 
     let i = 0;
-    while(i < this.#componentSubscriptions.length){
+    while(i<this.#componentSubscriptions.length){
       if(this.#componentSubscriptions[i] === component){
         this.#componentSubscriptions = this.#componentSubscriptions.splice(i, 1);
         break;
@@ -183,7 +193,7 @@ class DataStore {
     }
     this.#componentSubscriptions.push(component);
 
-    if(!this.hasLatestData()){
+    if(!this.isWaitingForData()){
       this.fetchData();
     }
   }
@@ -192,21 +202,16 @@ class DataStore {
 class BaseDynamicComponent extends HTMLElement {
 
   #attachedEventsToShadowRoot = false;
+
   #componentIsRendering = false;
   #loadingFromStores = new Set();
   #loadingStarted = 0;
+
+  componentStore = {};
+
   #loadingIndicatorConfig;
   #subscribedStores = [];
 
-	//Stores state for the component.
-  componentStore = {};
-
-	/**
-	 * @param dataStoreSubscriptions - An array of data stores the component should
-	 * subscribe to.
-	 * @param loadingIndicatorConfig - Configuration for a custom loading
-	 * indicator.
-	 **/
   constructor(dataStoreSubscriptions = [], loadingIndicatorConfig) {
     super();
 
@@ -214,7 +219,6 @@ class BaseDynamicComponent extends HTMLElement {
       this.#loadingIndicatorConfig = loadingIndicatorConfig;
     }
 
-		// Make sure component is subscribed to data stores.
     this.#subscribedStores = dataStoreSubscriptions;
     for(let i=0;i <this.#subscribedStores.length;i++){
       this.#subscribedStores[i].dataStore.subscribeComponent(this);
@@ -223,10 +227,6 @@ class BaseDynamicComponent extends HTMLElement {
     this.updateFromSubscribedStores();
   }
 
-	/**
-	 * Shows custom loading indicator if it exists. This custom loading indicator
-	 * replaces UI components and disables any user events.
-	 **/
   lockComponent(dataStore){
 
     if(!this.#loadingFromStores.has(dataStore)){
@@ -235,12 +235,12 @@ class BaseDynamicComponent extends HTMLElement {
       console.warn(`Attempting to lock component ${this.constructor.name} multiple times`);
     }
 
-		// Save the timestamp for when the loading started.
     if(this.#loadingStarted === 0){
       this.#loadingStarted = Date.now();
     }
 
     if(this.#loadingIndicatorConfig){
+
       if (this.shadowRoot === null) {
         this.attachShadow({ mode: "open" });
         const template = document.createElement("template");
@@ -250,24 +250,20 @@ class BaseDynamicComponent extends HTMLElement {
       this.shadowRoot.innerHTML =
         this.getTemplateStyle() + this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
     }
+
   }
 
   unlockComponent(dataStore) {
     this.#loadingFromStores.delete(dataStore);
   }
 
-	/**
-	 * Unsubscribe component when it is removed from the UI.
-	 **/
   disconnectedCallback(){
-    for(let i = 0; i < this.#subscribedStores.length; i++){
+    for(let i=0;i<this.#subscribedStores.length;i++){
       this.#subscribedStores[i].dataStore.unsubscribeComponent(this);
     }
+
   }
 
-	/**
-	 * Update component with state data
-	 **/
   updateData(storeUpdates) {
 
     if(this.#componentIsRendering){
@@ -295,18 +291,15 @@ class BaseDynamicComponent extends HTMLElement {
   updateFromSubscribedStores() {
 
     let allSubscribedStoresHaveData = true;
-    for(let i = 0; i < this.#subscribedStores.length; i++){
-      allSubscribedStoresHaveData = 
-				allSubscribedStoresHaveData &&
-        (this.#subscribedStores[i].dataStore.hasLatestData());
+    for(let i=0; i<this.#subscribedStores.length; i++){
+      allSubscribedStoresHaveData = allSubscribedStoresHaveData &&
+        (this.#subscribedStores[i].dataStore.isWaitingForData());
     }
 
-		// Make sure a component state is updated only when all the subscribed
-		// stores have data 
     if(allSubscribedStoresHaveData){
 
       let dataToUpdate = {};
-      for(let i =0; i < this.#subscribedStores.length; i++){
+      for(let i =0;i<this.#subscribedStores.length;i++){
 
         const item = this.#subscribedStores[i];
         let storeData = item.dataStore.getStoreData();
@@ -324,6 +317,7 @@ class BaseDynamicComponent extends HTMLElement {
           }
         }
       }
+
       this.updateData(
         dataToUpdate,
       );
@@ -343,35 +337,40 @@ class BaseDynamicComponent extends HTMLElement {
 
       console.log(`Loaded data for ${this.constructor.name} in ${loadTime} milliseconds`);
       this.#loadingStarted = 0;
-      
-			//Handle case where loading indicator is configured to stay visible for a
-			//minimum amount of time.
-			if(this.#loadingIndicatorConfig?.minTimeMs){
+      if(this.#loadingIndicatorConfig?.minTimeMs){
         const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;
+
 
         const self = this;
         if(remainingTime > 0){
           setTimeout(()=>{
+            // @ts-ignore
             self.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data);
           },remainingTime);
         } else {
+
+          // @ts-ignore
           this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data);
         }
       } else {
+        // @ts-ignore
         this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data);
       }
+
     }
     else {
+      // @ts-ignore
       this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data);
     }
   }
+
 
   render(data){
     throw new Error(`render(data) function for ${this.constructor.name} must be defined` )
   }
 
   /*
-		Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>
+  - Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>
   */
   getTemplateStyle(){
     throw new Error(`getTemplateStyle function for ${this.constructor.name} must be defined` )
@@ -434,8 +433,9 @@ function deleteLocalStoreData(key){
 class ApiLoadAction extends DataStoreLoadAction {
 
   #getRequestConfig;
-
-  constructor(getRequestConfig) {
+  constructor(
+    getRequestConfig
+  ) {
     super();
     this.#getRequestConfig = getRequestConfig;
   }
@@ -443,8 +443,7 @@ class ApiLoadAction extends DataStoreLoadAction {
   getRequestConfig(params){
     return this.#getRequestConfig(params);
   }
-  
-	/**
+  /**
    * @param params API request parameters
    * @param cacheKey
    * @param requestKey
@@ -452,6 +451,7 @@ class ApiLoadAction extends DataStoreLoadAction {
   async fetch(params, cacheKey, requestKey){
 
     const queryConfig = this.#getRequestConfig(params);
+
 
     if(!queryConfig.headers){
       queryConfig.headers = {};
@@ -515,7 +515,7 @@ class ApiLoadAction extends DataStoreLoadAction {
 
     try {
 
-      //The replace call is a workaround for an issue with url strings containing double quotes.
+      //The replace call is a workaround for an issue with url strings containing double quotes"
       const response = await fetch(queryConfig.url.replace(/"/g, ""), {
         method: queryConfig.method ?? ApiActionType.GET,
         headers: queryConfig.headers,
@@ -537,10 +537,12 @@ class ApiLoadAction extends DataStoreLoadAction {
         clearSessionStorage();
       }
       return { status: 200 };
+
     } catch (e) {
       return {errorMessage:e.message};
     }
   }
+
 }
 
 /**
@@ -552,16 +554,20 @@ class CustomLoadAction extends DataStoreLoadAction {
 
   #loadFunction;
 
-  constructor(loadFunction) {
+  constructor(
+    loadFunction
+  ) {
     super();
     this.#loadFunction = loadFunction;
   }
 
   async fetch(params) {
+
     return await this.#loadFunction(
       params,
     );
   }
+
 }
 
 export { ApiLoadAction, BaseDynamicComponent, BaseTemplateComponent, CustomLoadAction, DataStore, DataStoreLoadAction, addLocalStorageData, clearSessionStorage, deleteLocalStoreData, getLocalStorageDataIfPresent };

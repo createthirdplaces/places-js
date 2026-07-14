@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>places-js-test</title>
+  
+    <script type="module">
+      import {BaseDynamicComponent} from './src/places-js-latest.js'
+
+       export class InnerTestComponent extends BaseDynamicComponent {
+        getTemplateStyle() {
+          return `<style></style>`;
+        }
+
+        render(){
+          return `<button>Test</button>`;
+        }
+      }
+
+      export class TestComponent extends BaseDynamicComponent {
+        
+        constructor(){
+          super();
+
+          let self = this;
+          let i = setInterval(function (){           
+             if(self.shadowRoot && self.shadowRoot.getHTML().length > 45000){
+                console.log("Rendering time: "+(Date.now()-window.startTime));
+                clearInterval(i);
+              }
+            },10);
+          }
+
+        getTemplateStyle() {
+          return `<style></style>`;
+        }
+        
+        render(){
+
+          window.startTime = Date.now();
+          let html = "";
+          for(let i=0;i<1000;i++){
+            html+= `<inner-test-component></inner-test-component>`
+          }
+          return html;
+        }
+      }
+      
+      customElements.define('inner-test-component',InnerTestComponent);
+      customElements.define('test-component',TestComponent);
+
+    </script>
+  </head>
+  
+  <body>
+    <div id="app">
+      <test-component></test-component> 
+    </div>
+  </body>
+</html>

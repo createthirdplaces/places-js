@@ -18,7 +18,6 @@
   ],
   "scripts": {
     "build": "rollup -c rollup.config.js",
-
     "updateLocal": "npm run build && yalc publish --push --replace"
   },
   "repository": {

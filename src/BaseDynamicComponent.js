@@ -110,7 +110,7 @@ export class BaseDynamicComponent extends HTMLElement {
     for(let i = 0; i < this.#subscribedStores.length; i++){
       allSubscribedStoresHaveData = 
 				allSubscribedStoresHaveData &&
-        (this.#subscribedStores[i].dataStore.isWaitingForData())
+        (this.#subscribedStores[i].dataStore.hasLatestData())
     }
 
 		// Make sure a component state is updated only when all the subscribed

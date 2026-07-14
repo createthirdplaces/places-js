@@ -32,7 +32,7 @@ export class DataStore {
   /**
    * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
    */
-  isWaitingForData() {
+  hasLatestData() {
     return this.#storeData !== null && this.#storeData !== undefined  && !this.#isLoading;
   }
 
@@ -130,7 +130,7 @@ export class DataStore {
     }
     this.#componentSubscriptions.push(component);
 
-    if(!this.isWaitingForData()){
+    if(!this.hasLatestData()){
       this.fetchData();
     }
   }

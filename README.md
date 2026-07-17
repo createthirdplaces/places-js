@@ -1,4 +1,6 @@
-Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. It is designed to be straighforward to pick up with CSS, HTML, and JS experience,
+Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. 
+
+All code was written by hand without LLM assistance, and LLMs will not be used for future changes.
 
 Places.js supports the following features and has no external JS dependencies.
 
@@ -10,3 +12,8 @@ Places.js supports the following features and has no external JS dependencies.
  
 - [This repo](https://codeberg.org/createthirdplaces/DMVBoardGames/src/branch/main/src/ui) has an example of how places.js is used.
 
+## Contributing
+
+Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR. 
+
+Also, places.js has a zero LLM use policy. This means all PRs and issues should be created without LLM assistance. In addition, skill files or 

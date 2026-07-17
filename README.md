@@ -1,6 +1,4 @@
-Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. 
-
-All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
+Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
 Places.js supports the following features and has no external JS dependencies.
 

@@ -14,7 +14,8 @@ Places.js supports the following features and has no external JS dependencies.
 
 Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR. 
 
-Also, places.js has a zero LLM use policy.
+Also, places.js has a zero LLM use policy. In accordance with the policy, these rules should be followed:
+
  - All PRs and issues should be created without LLM assistance. 
  - Comments on PRs or issues should be created without LLM assistance.
  - Skill files or other files used to support LLM use should not be added.

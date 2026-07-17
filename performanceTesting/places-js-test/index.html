@@ -12,7 +12,11 @@
 
        export class InnerTestComponent extends BaseDynamicComponent {
         getTemplateStyle() {
-          return `<style></style>`;
+          return `
+            button {
+              font-size: ${Math.random()+1}em;
+            }
+          `;
         }
 
         render(){
@@ -27,7 +31,7 @@
 
           let self = this;
           let i = setInterval(function (){           
-             if(self.shadowRoot && self.shadowRoot.getHTML().length > 45000){
+             if(self.shadowRoot && self.shadowRoot.getHTML().length > 9000){
                 console.log("Rendering time: "+(Date.now()-window.startTime));
                 clearInterval(i);
               }

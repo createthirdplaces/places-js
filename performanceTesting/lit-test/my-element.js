@@ -1,7 +1,13 @@
-import {LitElement, html} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
+import {LitElement, html, css} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
 
 export class InnerElement extends LitElement {
+  static styles = css`
+    button {
+      font-size: ${Math.random()+1}em;
+    }
+  `;
   render() {
+    console.log(Date.now() - window.startTime);
     return html`<button>Test</button>`;
   }
 }
@@ -10,6 +16,7 @@ export class MyElement extends LitElement {
   static properties = {
     version: {},
   };
+
 
   constructor() {
     super();

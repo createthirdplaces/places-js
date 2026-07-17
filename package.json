@@ -1,28 +1,8 @@
 {
-  "name": "@bponnaluri/places-js",
-  "version": "0.0.50",
-  "homepage": "https://github.com/createthirdplaces/places-js#",
-  "license": "GPL-3.0",
-  "description": "Places.js is a lightweight Javascript framework with support for state management, asynchronous data fetching with zero dependencies, and shadow DOM",
-  "type": "module",
-  "keywords": [
-    "framework",
-    "ui",
-    "state"
-  ],
-  "main": "dist/places-js.umd.js",
-  "module": "dist/places-js.esm.js",
-  "unpkg": "dist/places-js.umd.min.js",
-  "files": [
-    "dist"
-  ],
+  "type":"module",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "updateLocal": "npm run build && yalc publish --push --replace"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/createthirdplaces/places-js.git"
   },
   "devDependencies": {
     "rollup": "^4.46.3"

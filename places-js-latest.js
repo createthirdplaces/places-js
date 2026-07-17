@@ -362,7 +362,7 @@ class BaseDynamicComponent extends HTMLElement {
       }
     }
     else {
-      this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data);
+      this.shadowRoot.innerHTML = this.render(data);
     }
   }
 

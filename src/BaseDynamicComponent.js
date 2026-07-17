@@ -26,7 +26,13 @@ export class BaseDynamicComponent extends HTMLElement {
       this.#loadingIndicatorConfig = loadingIndicatorConfig;
     }
 
-		// Make sure component is subscribed to data stores.
+    //Performance optimization if component is not subscribed to data stores.
+    if(dataStoreSubscriptions.length === 0) {
+      this.updateData({});
+      return;
+    }
+		
+    // Make sure component is subscribed to data stores.
     this.#subscribedStores = dataStoreSubscriptions
     for(let i=0;i <this.#subscribedStores.length;i++){
       this.#subscribedStores[i].dataStore.subscribeComponent(this);

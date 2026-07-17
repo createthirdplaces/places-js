@@ -16,7 +16,6 @@ export class MyElement extends LitElement {
     this.version = 'STARTING';
  
     let self = this;
-let
     let i = setInterval(function(){
       if(self.shadowRoot.getHTML().length > 1000){
         clearInterval(i);

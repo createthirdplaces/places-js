@@ -7,10 +7,10 @@ export class DataStore {
   static #storeCount = 0;
 
   #componentSubscriptions = [];
-	#isLoading = false; 
+  #isLoading = false; 
   #loadAction;
   #requestStoreId;
-	#storeData = null;
+  #storeData = null;
 
   constructor(loadAction) {
     this.#loadAction = loadAction;

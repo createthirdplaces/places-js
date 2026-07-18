@@ -1,10 +1,21 @@
 Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
-Places.js supports the following features and has no external JS dependencies.
 
- - Asynchronous data fetching.
- - Cross-component state management that integrates with data fetching.
- - Support for creating pages that are a combination of static HTML and islands of interactivity.
+ Places.js is designed to be an alternative to [Lit](https://lit.dev/docs/api/LitElement/) and [React](https://react.dev/)
+
+ ## Comparison to React and Lit
+
+ 
+| Framework  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Island architecture support](https://jasonformat.com/islands-architecture/)
+|-------|-----|------------| ------------|
+| Places.js | Yes  | Yes   | Yes |
+| React(v19.2)  | No | No  | Yes, except for cross-island state updates. |
+| Lit(v3) | No  | No | Yes, except for cross-island state updates. |
+
+
+React and Lit require third party libraries or manual code to fully support the features listed above.
+
+ ## Getting started
 
  To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo. See the places.js documentation at [https://createthirdplaces.org/tech/placesjs.html](https://createthirdplaces.org/tech/placesjs.html) for a more detailed guide
  
@@ -19,4 +30,7 @@ Also, places.js has a zero LLM use policy. In accordance with the policy, these 
  - All PRs and issues should be created without LLM assistance. 
  - Comments on PRs or issues should be created without LLM assistance.
  - Skill files or other files used to support LLM use should not be added.
+
+ ## Extending Places.js
  
+ - Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.  [See the documentation](https://createthirdplaces.org/tech/placesjs.html) for more details on methods that can be overwritten.                                                                 

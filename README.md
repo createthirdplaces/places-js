@@ -1,16 +1,15 @@
-Places.js is a lightweight Javascript framework for creating interactive websites promoting in person interaction. All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
+Places.js is a lightweight human-centric Javascript framework for creating interactive websites. All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
 
  Places.js is designed to be an alternative to [Lit](https://lit.dev/docs/api/LitElement/) and [React](https://react.dev/)
 
  ## Comparison to React and Lit
 
- 
-| Framework  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Island architecture support](https://jasonformat.com/islands-architecture/)
+| Framework  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Island architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size
 |-------|-----|------------| ------------|
-| Places.js | Yes  | Yes   | Yes |
-| React(v19.2)  | No | No  | Yes, except for cross-island state updates. |
-| Lit(v3) | No  | No | Yes, except for cross-island state updates. |
+| Places.js | Yes  | Yes   | Yes | [7.2 kB] |
+| [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | [7.4 kB](https://bundlephobia.com/package/react@19.2.7) |
+| [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | [15.1 kB](https://bundlephobia.com/package/lit@3.3.3) |
 
 
 React and Lit require third party libraries or manual code to fully support the features listed above.

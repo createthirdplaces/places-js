@@ -17,7 +17,7 @@ export class DataStore {
     this.#componentSubscriptions = [];
     this.#requestStoreId = `data-store-${DataStore.#storeCount}`;
     
-		sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
+	sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
     DataStore.#storeCount++;
   }
 
@@ -90,7 +90,7 @@ export class DataStore {
         response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey); 
       } 
       
-			self.#storeData = response;
+	  self.#storeData = response;
       self.#isLoading = false;
 
       for(let i = 0; i < self.#componentSubscriptions.length; i++){

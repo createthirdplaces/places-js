@@ -3,7 +3,7 @@ export {clearSessionStorage} from './utils/SessionStorageUtils.js'
 export {BaseDynamicComponent} from './BaseDynamicComponent.js'
 export {BaseTemplateComponent} from './BaseTemplateComponent.js'
 
-import {ApiActionType} from "./state/update/ApiActionType.js"
+export {ApiActionType} from "./state/update/ApiActionType.js"
 export {ApiLoadAction} from "./state/update/ApiLoadAction.js";
 export {CustomLoadAction} from "./state/update/CustomLoadAction.js"
 

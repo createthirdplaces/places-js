@@ -5,7 +5,7 @@ Places.js is a lightweight human-centric Javascript framework for creating inter
 
  ## Comparison to React and Lit
 
-| Framework  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Island architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size
+| Framework  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Island architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size|
 |-------|-----|------------| ------------|
 | Places.js | Yes  | Yes   | Yes | [7.2 kB] |
 | [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | [7.4 kB](https://bundlephobia.com/package/react@19.2.7) |

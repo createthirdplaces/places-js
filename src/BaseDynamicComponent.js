@@ -58,15 +58,8 @@ export class BaseDynamicComponent extends HTMLElement {
       this.#loadingStarted = Date.now();
     }
 
-    if(this.#loadingIndicatorConfig){
-      if (this.shadowRoot === null) {
-        this.attachShadow({ mode: "open" });
-        const template = document.createElement("template");
-        this.shadowRoot.appendChild(template.content.cloneNode(true));
-      }
-      // @ts-ignore
-      this.shadowRoot.innerHTML =
-        this.getTemplateStyle() + this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
+    if(this.#loadingIndicatorConfig){ 
+      this.innerHTML = this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
     }
   }
 
@@ -99,14 +92,6 @@ export class BaseDynamicComponent extends HTMLElement {
     this.#componentIsRendering = true;
     this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
     this.#generateAndSaveHTML(this.componentStore);
-
-    if(this.shadowRoot){
-      if(this.attachHandlersToShadowRoot && !this.#attachedEventsToShadowRoot){
-        this.attachHandlersToShadowRoot(this.shadowRoot);
-        this.#attachedEventsToShadowRoot = true;
-      }
-    }
-
     this.#componentIsRendering = false;
   }
 
@@ -149,12 +134,6 @@ export class BaseDynamicComponent extends HTMLElement {
   }
 
   #generateAndSaveHTML(data) {
-    if (this.shadowRoot === null) {
-      this.attachShadow({ mode: "open" });
-      const template = document.createElement("template");
-      this.shadowRoot.appendChild(template.content.cloneNode(true));
-    }
-
     if(this.#loadingStarted > 0){
       const current = Date.now();
       const loadTime = current - this.#loadingStarted;
@@ -170,17 +149,17 @@ export class BaseDynamicComponent extends HTMLElement {
         const self = this;
         if(remainingTime > 0){
           setTimeout(()=>{
-            self.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+            self.innerHTML = this.render(data)
           },remainingTime);
         } else {
-          this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+          this.innerHTML = this.render(data)
         }
       } else {
-        this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+        this.innerHTML = this.render(data)
       }
     }
     else {
-      this.shadowRoot.innerHTML = this.getTemplateStyle() + this.render(data)
+      this.innerHTML = this.render(data)
     }
   }
 
@@ -188,10 +167,4 @@ export class BaseDynamicComponent extends HTMLElement {
     throw new Error(`render(data) function for ${this.constructor.name} must be defined` )
   }
 
-  /*
-		Returns CSS styles specific to the component. The string should be in the format <style> ${CSS styles} </style>
-  */
-  getTemplateStyle(){
-    throw new Error(`getTemplateStyle function for ${this.constructor.name} must be defined` )
-  }
 }

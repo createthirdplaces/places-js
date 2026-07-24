@@ -7,7 +7,7 @@ Places.js is a lightweight human-centric Javascript framework for creating inter
 
 | Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size| Build step required |
 |-----------|------|------ | --- | ------ | -- |
-| Places.js | Yes  | Yes   | Yes | 7.3 kB | No |
+| Places.js | Yes  | Yes   | Yes | 6.2 kB | No |
 | [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | [7.4 kB](https://bundlephobia.com/package/react@19.2.7) | Yes |
 | [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | [15.1 kB](https://bundlephobia.com/package/lit@3.3.3) | No |
 
@@ -30,6 +30,11 @@ Also, places.js has a zero LLM use policy. In accordance with the policy, these 
  - Comments on PRs or issues should be created without LLM assistance.
  - Skill files or other files used to support LLM use should not be added.
 
+
+## Creating a minified build
+
+Run the command `npx terser places-js-latest.js -o places-js-min.js --compress
+--mangle --module`
  ## Extending Places.js
  
  - Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.  [See the documentation](https://createthirdplaces.org/tech/placesjs.html) for more details on methods that can be overwritten.                                                                 

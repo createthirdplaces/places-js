@@ -71,8 +71,13 @@ export class ApiLoadAction{
    */
   static async getResponseData(queryConfig){
 
-    const authData =  window.localStorage.getItem("authToken")?.access_token
+    let authData = null;
 
+    const data = window.localStorage.getItem("authToken");
+    if(data){
+      authData = JSON.parse(data).access_token;
+    }
+    
     if (authData) {
       if(queryConfig.headers){
         queryConfig.headers["authToken"] = authData;

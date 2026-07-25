@@ -95,8 +95,8 @@ export class BaseDynamicComponent extends HTMLElement {
         (this.#subscribedStores[i].dataStore.hasLatestData())
     }
 
-		// Make sure a component state is updated only when all the subscribed
-		// stores have data 
+    // Make sure a component state is updated only when all the subscribed
+    // stores have data 
     if(allSubscribedStoresHaveData){
 
       let dataToUpdate = {}
@@ -107,7 +107,6 @@ export class BaseDynamicComponent extends HTMLElement {
         if(item.componentReducer){
           storeData = item.componentReducer(storeData);
         }
-
         if(item.fieldName) {
           dataToUpdate[item.fieldName] = storeData;
         } else {
@@ -127,11 +126,10 @@ export class BaseDynamicComponent extends HTMLElement {
 
       this.#loadingStarted = 0;
       
-			//Handle case where loading indicator is configured to stay visible for a
-			//minimum amount of time.
-			if(this.#loadingIndicatorConfig?.minTimeMs){
+      //Handle case where loading indicator is configured to stay visible for a
+      //minimum amount of time.
+      if(this.#loadingIndicatorConfig?.minTimeMs){
         const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;
-
         const self = this;
         if(remainingTime > 0){
           setTimeout(()=>{

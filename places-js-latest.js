@@ -296,7 +296,6 @@ class BaseTemplateComponent extends HTMLElement {
  */
 class CustomLoadAction {
   constructor(loadFunction) {
-    super();
     this.fetch = async (params) => {
       return await loadFunction(params);
     };

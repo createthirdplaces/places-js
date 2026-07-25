@@ -1,5 +1,4 @@
-import {freezeState} from "./state/StateUtils.js";
-import {DataStore} from "./state/update/DataStore.js";
+import {freezeState} from './StateUtils'
 
 export class BaseDynamicComponent extends HTMLElement {
 
@@ -41,6 +40,7 @@ export class BaseDynamicComponent extends HTMLElement {
     this.updateFromSubscribedStores();
   }
 
+  
 	/**
 	 * Shows custom loading indicator if it exists. This custom loading indicator
 	 * replaces UI components and disables any user events.
@@ -49,8 +49,6 @@ export class BaseDynamicComponent extends HTMLElement {
 
     if(!this.#loadingFromStores.has(dataStore)){
       this.#loadingFromStores.add(dataStore);
-    } else {
-      console.warn(`Attempting to lock component ${this.constructor.name} multiple times`);
     }
 
 		// Save the timestamp for when the loading started.
@@ -76,23 +74,16 @@ export class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-	/**
+  	/**
 	 * Update component with state data
 	 **/
   updateData(storeUpdates) {
-
-    if(this.#componentIsRendering){
-      console.warn(`Attempting to trigger multiple renders at the same time on component ${this.constructor.name}`)
-    }
-
     if (!storeUpdates) {
-      return;
+      this.#componentIsRendering = true;
+      this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
+      this.#generateAndSaveHTML(this.componentStore);
+      this.#componentIsRendering = false;
     }
-
-    this.#componentIsRendering = true;
-    this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
-    this.#generateAndSaveHTML(this.componentStore);
-    this.#componentIsRendering = false;
   }
 
   updateFromSubscribedStores() {
@@ -121,10 +112,6 @@ export class BaseDynamicComponent extends HTMLElement {
           dataToUpdate[item.fieldName] = storeData;
         } else {
           dataToUpdate = storeData;
-          if(this.#subscribedStores?.length > 1){
-            throw new Error(`Component ${this.constructor.name} is subscribed to multiple data stores. 
-              Each one must be associated with a specified field name`)
-          }
         }
       }
       this.updateData(
@@ -138,7 +125,6 @@ export class BaseDynamicComponent extends HTMLElement {
       const current = Date.now();
       const loadTime = current - this.#loadingStarted;
 
-      console.log(`Loaded data for ${this.constructor.name} in ${loadTime} milliseconds`)
       this.#loadingStarted = 0;
       
 			//Handle case where loading indicator is configured to stay visible for a
@@ -163,8 +149,5 @@ export class BaseDynamicComponent extends HTMLElement {
     }
   }
 
-  render(data){
-    throw new Error(`render(data) function for ${this.constructor.name} must be defined` )
-  }
 
 }

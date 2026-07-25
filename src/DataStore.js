@@ -1,6 +1,4 @@
-import { DataStoreLoadAction } from "./DataStoreLoadAction";
-import {freezeState} from "../StateUtils";
-import {getItemFromSessionStorage} from "../../utils/SessionStorageUtils.js";
+import {freezeState} from "./StateUtils";
 
 export class DataStore {
 
@@ -15,7 +13,7 @@ export class DataStore {
   constructor(loadAction) {
     this.#loadAction = loadAction;
     this.#componentSubscriptions = [];
-    this.#requestStoreId = `data-store-${DataStore.#storeCount}`;
+    this.#requestStoreId = `store-${DataStore.#storeCount}`;
     
 	sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}))
     DataStore.#storeCount++;
@@ -58,8 +56,6 @@ export class DataStore {
    */
   async fetchData(params = {}, dataStore){
 
-    const self = this;
-
     // Do not make a data request if there is an active one in progress. The active one will push data to subscribed components.
     if(!this.#isLoading) {
       this.#isLoading = true;
@@ -70,16 +66,24 @@ export class DataStore {
       let requestKey = null;
       
       // Retrieve cached response if one exists.
-			if(self.#requestStoreId || self.#requestStoreId.length > 0){
+			if(this.#requestStoreId || this.#requestStoreId.length > 0){
         requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
-        response = getItemFromSessionStorage(this.#requestStoreId, requestKey);
+      
+        const dataStr = sessionStorage.getItem(requestKey);
+        if(dataStr){
+          const data = JSON.parse(dataStr);
+
+          if(!(Object.keys(data).length === 0) && requestData in data){
+            response = data[requestData];
+          }
+        }
       }
 
       // Make an API call if a cached response does not exist.
       if(response === null) {
         //Replace component with loading indicator if one exists.
-        for (let i = 0; i < self.#componentSubscriptions.length; i++) {
-          self.#componentSubscriptions[i].lockComponent(self);
+        for (let i = 0; i < this.#componentSubscriptions.length; i++) {
+          this.#componentSubscriptions[i].lockComponent(this);
         }
         if (dataStore) {
           const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
@@ -87,15 +91,15 @@ export class DataStore {
             dataStoreSubscribedComponents[i].lockComponent(dataStore);
           }
         }
-        response = await this.#loadAction.fetch(params, self.#requestStoreId,requestKey); 
+        response = await this.#loadAction.fetch(params, this.#requestStoreId,requestKey); 
       } 
       
-	  self.#storeData = response;
-      self.#isLoading = false;
+	    this.#storeData = response;
+      this.#isLoading = false;
 
-      for(let i = 0; i < self.#componentSubscriptions.length; i++){
-        self.#componentSubscriptions[i].unlockComponent(self);
-        self.#componentSubscriptions[i].updateFromSubscribedStores();
+      for(let i = 0; i < this.#componentSubscriptions.length; i++){
+        this.#componentSubscriptions[i].unlockComponent(this);
+        this.#componentSubscriptions[i].updateFromSubscribedStores();
       }
 
       if(dataStore){
@@ -110,12 +114,7 @@ export class DataStore {
   }
 
   unsubscribeComponent(component){
-    const idx = this.#componentSubscriptions.indexOf(component);
-    if(idx === -1){
-      console.warn(`Attempt to unsubscribe ${component.constructor.name} from store it is not subscribed to`)
-      return;
-    }
-    this.#componentSubscriptions.splice(idx, 1);
+    this.#componentSubscriptions.splice(this.#componentSubscriptions.indexOf(component), 1);
   }
 
   subscribeComponent(component){

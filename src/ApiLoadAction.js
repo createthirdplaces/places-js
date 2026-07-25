@@ -26,7 +26,10 @@ export class ApiLoadAction{
 
     if(cacheKey && requestKey){
       if(queryConfig?.method !== "GET"){
-        clearSessionStorage();
+        for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}))
+        }
       }
         
       const data = JSON.parse(sessionStorage.getItem(cacheKey));

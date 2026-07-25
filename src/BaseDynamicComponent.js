@@ -78,7 +78,7 @@ export class BaseDynamicComponent extends HTMLElement {
 	 * Update component with state data
 	 **/
   updateData(storeUpdates) {
-    if (!storeUpdates) {
+    if (storeUpdates) {
       this.#componentIsRendering = true;
       this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
       this.#generateAndSaveHTML(this.componentStore);

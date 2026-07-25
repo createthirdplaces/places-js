@@ -1,1 +1,443 @@
-class ApiLoadAction{constructor(t){this.getRequestConfig=t}async fetch(t,e,s){const o=this.getRequestConfig(t);o.headers||(o.headers={});const n=await ApiLoadAction.getResponseData(o);if(e&&s){"GET"!==o?.method&&clearSessionStorage();const t=JSON.parse(sessionStorage.getItem(e));t[s]=n,sessionStorage.setItem(e,JSON.stringify(t))}return n}static async#t(t,e){let s;const o=t.headers.get("content-type");return s=o&&o.includes("application/json")?await t.json():404===t.status?`Endpoint ${e} not found`:await t.text(),{status:t.status,errorMessage:s,endpoint:e}}static async getResponseData(t){const e=window.localStorage.getItem("authToken")?.access_token;e&&(t.headers?t.headers.authToken=e:t.headers={authToken:e});try{const e=await fetch(t.url.replace(/"/g,""),{method:t.method??"GET",headers:t.headers,body:t.body});if(200!==e.status)return await this.#t(e,t.url);if("application/json"===e.headers.get("content-type"))return await e.json();if("GET"!==t.method)for(let t=0;t<sessionStorage.length;t++){const e=sessionStorage.key(t);sessionStorage.setItem(e,JSON.stringify({}))}return{status:200}}catch(t){return{errorMessage:t.message}}}}function freezeState(t){if(!t||"{}"===JSON.stringify(t))return{};for(let[e,s]of Object.entries(t))t.hasOwnProperty(e)&&"object"==typeof s&&freezeState(s);return Object.freeze(t)}class BaseDynamicComponent extends HTMLElement{#e=!1;#s=!1;#o=new Set;#n=0;#i;#r=[];componentStore={};constructor(t=[],e){if(super(),e&&(this.#i=e),0!==t.length){this.#r=t;for(let t=0;t<this.#r.length;t++)this.#r[t].dataStore.subscribeComponent(this);this.updateFromSubscribedStores()}else this.updateData({})}lockComponent(t){this.#o.has(t)||this.#o.add(t),0===this.#n&&(this.#n=Date.now()),this.#i&&(this.innerHTML=this.#i.generateLoadingIndicatorHtml())}unlockComponent(t){this.#o.delete(t)}disconnectedCallback(){for(let t=0;t<this.#r.length;t++)this.#r[t].dataStore.unsubscribeComponent(this)}updateData(t){t||(this.#s=!0,this.componentStore={...this.componentStore,...freezeState(t)},this.#a(this.componentStore),this.#s=!1)}updateFromSubscribedStores(){let t=!0;for(let e=0;e<this.#r.length;e++)t=t&&this.#r[e].dataStore.hasLatestData();if(t){let t={};for(let e=0;e<this.#r.length;e++){const s=this.#r[e];let o=s.dataStore.getStoreData();s.componentReducer&&(o=s.componentReducer(o)),s.fieldName?t[s.fieldName]=o:t=o}this.updateData(t)}}#a(t){if(this.#n>0){const e=Date.now()-this.#n;if(this.#n=0,this.#i?.minTimeMs){const s=this.#i.minTimeMs-e,o=this;s>0?setTimeout(()=>{o.innerHTML=this.render(t)},s):this.innerHTML=this.render(t)}else this.innerHTML=this.render(t)}else this.innerHTML=this.render(t)}}class BaseTemplateComponent extends HTMLElement{connectedCallback(){this.attachShadow({mode:"open"}),this.shadowRoot;const t=document.createElement("template");t.innerHTML=this.getTemplateStyle()+"<div></div>",this.shadowRoot.appendChild(t.content.cloneNode(!0)),this.shadowRoot.querySelector("div").innerHTML=this.render()}}class CustomLoadAction{constructor(t){this.fetch=async e=>await t(e)}}class DataStore{static#c=0;#h=[];#d=!1;#u;#l;#p=null;constructor(t){this.#u=t,this.#h=[],this.#l=`store-${DataStore.#c}`,sessionStorage.setItem(this.#l,JSON.stringify({})),DataStore.#c++}getStoreData(){return this.#p}hasLatestData(){return null!==this.#p&&void 0!==this.#p&&!this.#d}updateStoreData(t){this.#p={...this.#p,...freezeState(t)};for(let t=0;t<this.#h.length;t++)this.#h[t].updateFromSubscribedStores()}getSubscribedComponents(){return this.#h}async fetchData(t={},e){if(!this.#d){this.#d=!0;const s=this.#u.getRequestConfig?this.#u.getRequestConfig(t):{};let o=null,n=null;if(this.#l||this.#l.length>0){n=`${s.method??""}_${s.url}_${JSON.stringify(s.body)??""}`;const t=sessionStorage.getItem(n);if(t){const e=JSON.parse(t);0!==Object.keys(e).length&&requestData in e&&(o=e[requestData])}}if(null===o){for(let t=0;t<this.#h.length;t++)this.#h[t].lockComponent(this);if(e){const t=e.getSubscribedComponents();for(let s=0;s<t.length;s++)t[s].lockComponent(e)}o=await this.#u.fetch(t,this.#l,n)}this.#p=o,this.#d=!1;for(let t=0;t<this.#h.length;t++)this.#h[t].unlockComponent(this),this.#h[t].updateFromSubscribedStores();if(e){const t=e.getSubscribedComponents();for(let s=0;s<t.length;s++)t[s].unlockComponent(e);e.updateStoreData(o)}return o}}unsubscribeComponent(t){this.#h.splice(this.#h.indexOf(t),1)}subscribeComponent(t){let e=0;for(;e<this.#h.length;){if(this.#h[e]===t){this.#h=this.#h.splice(e,1);break}e++}this.#h.push(t),this.hasLatestData()||this.fetchData()}}export{ApiLoadAction,BaseDynamicComponent,BaseTemplateComponent,CustomLoadAction,DataStore};
+/**
+ * Class to define a data store load action through an API call.
+ */
+class ApiLoadAction{
+
+  constructor(getRequestConfig) {
+    this.getRequestConfig = getRequestConfig;
+  }
+ 
+	/**
+   * @param params API request parameters
+   * @param cacheKey
+   * @param requestKey
+   */
+  async fetch(params, cacheKey, requestKey){
+
+    const queryConfig = this.getRequestConfig(params);
+
+    if(!queryConfig.headers){
+      queryConfig.headers = {};
+    }
+
+    const response = await ApiLoadAction.getResponseData(
+      queryConfig,
+    );
+
+    if(cacheKey && requestKey){
+      if(queryConfig?.method !== "GET"){
+        for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}));
+        }
+      }
+        
+      const data = JSON.parse(sessionStorage.getItem(cacheKey));
+      data[requestKey] = response;
+      sessionStorage.setItem(cacheKey, JSON.stringify(data));
+
+    }
+    return response;
+  }
+
+  static async #getErrorData(response, url) {
+
+    let message;
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      message = await response.json();
+    } else {
+      if (response.status === 404) {
+        message = `Endpoint ${url} not found`;
+      } else {
+        message = await response.text();
+      }
+    }
+
+    return {
+      status: response.status,
+      errorMessage: message,
+      endpoint: url,
+    };
+  }
+
+  /**
+   * Directly make an API request and return the data. Use this method if the API request needs
+   * to be run as part of an event handler and no other components subscribe to the request.
+   * Cache data will not be used or updated.
+   *
+   * @param {ApiRequestConfig} queryConfig Configuration of the API request.
+   */
+  static async getResponseData(queryConfig){
+
+    const authData =  window.localStorage.getItem("authToken")?.access_token;
+
+    if (authData) {
+      if(queryConfig.headers){
+        queryConfig.headers["authToken"] = authData;
+      } else {
+        queryConfig.headers = {
+          "authToken": authData
+        };
+      }
+    }
+
+    try {
+
+      //The replace call is a workaround for an issue with url strings containing double quotes.
+      const response = await fetch(queryConfig.url.replace(/"/g, ""), {
+        method: queryConfig.method ?? "GET",
+        headers: queryConfig.headers,
+        body: queryConfig.body,
+      });
+
+      if (response.status !== 200) {
+        return await this.#getErrorData(response,queryConfig.url)
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType === "application/json") {
+        return await response.json();
+      }
+
+      //Clear cache because there was a likely data update.
+      if(queryConfig.method !== "GET"){
+       for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}));
+        }
+      }
+      return { status: 200 };
+    } catch (e) {
+      return {errorMessage:e.message};
+    }
+  }
+}
+
+function freezeState(state){
+  if(!state || JSON.stringify(state)==='{}'){
+    return {};
+  }
+  for (let [key, value] of Object.entries(state)) {
+    if (state.hasOwnProperty(key) && typeof value == "object") {
+      freezeState(value);
+    }
+  }
+  return Object.freeze(state);
+}
+
+class BaseDynamicComponent extends HTMLElement {
+
+  #attachedEventsToShadowRoot = false;
+  #componentIsRendering = false;
+  #loadingFromStores = new Set();
+  #loadingStarted = 0;
+  #loadingIndicatorConfig;
+  #subscribedStores = [];
+
+	//Stores state for the component.
+  componentStore = {};
+
+	/**
+	 * @param dataStoreSubscriptions - An array of data stores the component should
+	 * subscribe to.
+	 * @param loadingIndicatorConfig - Configuration for a custom loading
+	 * indicator.
+	 **/
+  constructor(dataStoreSubscriptions = [], loadingIndicatorConfig) {
+    super();
+
+    if(loadingIndicatorConfig){
+      this.#loadingIndicatorConfig = loadingIndicatorConfig;
+    }
+
+    //Performance optimization if component is not subscribed to data stores.
+    if(dataStoreSubscriptions.length === 0) {
+      this.updateData({});
+      return;
+    }
+		
+    // Make sure component is subscribed to data stores.
+    this.#subscribedStores = dataStoreSubscriptions;
+    for(let i=0;i <this.#subscribedStores.length;i++){
+      this.#subscribedStores[i].dataStore.subscribeComponent(this);
+    }
+
+    this.updateFromSubscribedStores();
+  }
+
+  
+	/**
+	 * Shows custom loading indicator if it exists. This custom loading indicator
+	 * replaces UI components and disables any user events.
+	 **/
+  lockComponent(dataStore){
+
+    if(!this.#loadingFromStores.has(dataStore)){
+      this.#loadingFromStores.add(dataStore);
+    }
+
+		// Save the timestamp for when the loading started.
+    if(this.#loadingStarted === 0){
+      this.#loadingStarted = Date.now();
+    }
+
+    if(this.#loadingIndicatorConfig){ 
+      this.innerHTML = this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
+    }
+  }
+
+  unlockComponent(dataStore) {
+    this.#loadingFromStores.delete(dataStore);
+  }
+
+	/**
+	 * Unsubscribe component when it is removed from the UI.
+	 **/
+  disconnectedCallback(){
+    for(let i = 0; i < this.#subscribedStores.length; i++){
+      this.#subscribedStores[i].dataStore.unsubscribeComponent(this);
+    }
+  }
+
+  	/**
+	 * Update component with state data
+	 **/
+  updateData(storeUpdates) {
+    if (!storeUpdates) {
+      this.#componentIsRendering = true;
+      this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
+      this.#generateAndSaveHTML(this.componentStore);
+      this.#componentIsRendering = false;
+    }
+  }
+
+  updateFromSubscribedStores() {
+
+    let allSubscribedStoresHaveData = true;
+    for(let i = 0; i < this.#subscribedStores.length; i++){
+      allSubscribedStoresHaveData = 
+				allSubscribedStoresHaveData &&
+        (this.#subscribedStores[i].dataStore.hasLatestData());
+    }
+
+		// Make sure a component state is updated only when all the subscribed
+		// stores have data 
+    if(allSubscribedStoresHaveData){
+
+      let dataToUpdate = {};
+      for(let i =0; i < this.#subscribedStores.length; i++){
+
+        const item = this.#subscribedStores[i];
+        let storeData = item.dataStore.getStoreData();
+        if(item.componentReducer){
+          storeData = item.componentReducer(storeData);
+        }
+
+        if(item.fieldName) {
+          dataToUpdate[item.fieldName] = storeData;
+        } else {
+          dataToUpdate = storeData;
+        }
+      }
+      this.updateData(
+        dataToUpdate,
+      );
+    }
+  }
+
+  #generateAndSaveHTML(data) {
+    if(this.#loadingStarted > 0){
+      const current = Date.now();
+      const loadTime = current - this.#loadingStarted;
+
+      this.#loadingStarted = 0;
+      
+			//Handle case where loading indicator is configured to stay visible for a
+			//minimum amount of time.
+			if(this.#loadingIndicatorConfig?.minTimeMs){
+        const remainingTime = this.#loadingIndicatorConfig.minTimeMs - loadTime;
+
+        const self = this;
+        if(remainingTime > 0){
+          setTimeout(()=>{
+            self.innerHTML = this.render(data);
+          },remainingTime);
+        } else {
+          this.innerHTML = this.render(data);
+        }
+      } else {
+        this.innerHTML = this.render(data);
+      }
+    }
+    else {
+      this.innerHTML = this.render(data);
+    }
+  }
+
+
+}
+
+class BaseTemplateComponent extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({ mode: "open" });
+
+    this.shadowRoot;
+    const template = document.createElement("template");
+    
+    template.innerHTML = this.getTemplateStyle() + `<div></div>`;
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.shadowRoot.querySelector("div").innerHTML = this.render(); 
+  }
+}
+
+/**
+ * Class to define a custom data store load action with direct control over any async calls that are made.
+ * It is intended for use when additional processing needs to be done after an async call, or if a store needs
+ * to combine data from multiple sources.
+ */
+class CustomLoadAction {
+  constructor(loadFunction) {
+    this.fetch = async (params) => {
+      return await loadFunction(params);
+    };
+  }
+}
+
+class DataStore {
+
+  static #storeCount = 0;
+
+  #componentSubscriptions = [];
+  #isLoading = false; 
+  #loadAction;
+  #requestStoreId;
+  #storeData = null;
+
+  constructor(loadAction) {
+    this.#loadAction = loadAction;
+    this.#componentSubscriptions = [];
+    this.#requestStoreId = `store-${DataStore.#storeCount}`;
+    
+	sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
+    DataStore.#storeCount++;
+  }
+
+  /**
+   * Returns data from the store.
+   * @returns A JSON object representing an immutable copy of store data.
+   */
+  getStoreData() {
+    return this.#storeData;
+  }
+
+  /**
+   * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
+   */
+  hasLatestData() {
+    return this.#storeData !== null && this.#storeData !== undefined  && !this.#isLoading;
+  }
+
+  /**
+   * Update data in the store and trigger a render of components subscribed to the store.
+   * @param storeUpdates Updated store data. Fields not specified in storeData will not be updated.
+   */
+  updateStoreData(storeUpdates){
+    this.#storeData = {...this.#storeData,...freezeState(storeUpdates)};
+    for(let i = 0; i < this.#componentSubscriptions.length; i++){
+      this.#componentSubscriptions[i].updateFromSubscribedStores();
+    }
+  }
+
+  getSubscribedComponents(){
+    return this.#componentSubscriptions;
+  }
+
+  /**
+   * Retrieves data from an external source.
+   * @param params Parameters for the request.
+   * @param dataStore Optional data store that will be subscribed to updates from this store.
+   */
+  async fetchData(params = {}, dataStore){
+
+    // Do not make a data request if there is an active one in progress. The active one will push data to subscribed components.
+    if(!this.#isLoading) {
+      this.#isLoading = true;
+
+      const requestConfig = this.#loadAction.getRequestConfig ? this.#loadAction.getRequestConfig(params) : {};
+
+      let response = null;
+      let requestKey = null;
+      
+      // Retrieve cached response if one exists.
+			if(this.#requestStoreId || this.#requestStoreId.length > 0){
+        requestKey = `${requestConfig.method ?? ''}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ''}`;
+      
+        const dataStr = sessionStorage.getItem(requestKey);
+        if(dataStr){
+          const data = JSON.parse(dataStr);
+
+          if(!(Object.keys(data).length === 0) && requestData in data){
+            response = data[requestData];
+          }
+        }
+      }
+
+      // Make an API call if a cached response does not exist.
+      if(response === null) {
+        //Replace component with loading indicator if one exists.
+        for (let i = 0; i < this.#componentSubscriptions.length; i++) {
+          this.#componentSubscriptions[i].lockComponent(this);
+        }
+        if (dataStore) {
+          const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
+          for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
+            dataStoreSubscribedComponents[i].lockComponent(dataStore);
+          }
+        }
+        response = await this.#loadAction.fetch(params, this.#requestStoreId,requestKey); 
+      } 
+      
+	    this.#storeData = response;
+      this.#isLoading = false;
+
+      for(let i = 0; i < this.#componentSubscriptions.length; i++){
+        this.#componentSubscriptions[i].unlockComponent(this);
+        this.#componentSubscriptions[i].updateFromSubscribedStores();
+      }
+
+      if(dataStore){
+        const dataStoreSubscribedComponents = dataStore.getSubscribedComponents();
+        for(let i = 0; i < dataStoreSubscribedComponents.length; i++){
+          dataStoreSubscribedComponents[i].unlockComponent(dataStore);
+        }
+        dataStore.updateStoreData(response);
+      }
+      return response;
+    }
+  }
+
+  unsubscribeComponent(component){
+    this.#componentSubscriptions.splice(this.#componentSubscriptions.indexOf(component), 1);
+  }
+
+  subscribeComponent(component){
+
+    let i = 0;
+    while(i < this.#componentSubscriptions.length){
+      if(this.#componentSubscriptions[i] === component){
+        this.#componentSubscriptions = this.#componentSubscriptions.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+    this.#componentSubscriptions.push(component);
+
+    if(!this.hasLatestData()){
+      this.fetchData();
+    }
+  }
+}
+
+export { ApiLoadAction, BaseDynamicComponent, BaseTemplateComponent, CustomLoadAction, DataStore };

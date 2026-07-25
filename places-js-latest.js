@@ -26,7 +26,10 @@ class ApiLoadAction{
 
     if(cacheKey && requestKey){
       if(queryConfig?.method !== "GET"){
-        clearSessionStorage();
+        for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}));
+        }
       }
         
       const data = JSON.parse(sessionStorage.getItem(cacheKey));
@@ -202,7 +205,7 @@ class BaseDynamicComponent extends HTMLElement {
 	 * Update component with state data
 	 **/
   updateData(storeUpdates) {
-    if (!storeUpdates) {
+    if (storeUpdates) {
       this.#componentIsRendering = true;
       this.componentStore = {...this.componentStore,...freezeState(storeUpdates)};
       this.#generateAndSaveHTML(this.componentStore);

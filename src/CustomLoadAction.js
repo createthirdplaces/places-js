@@ -8,7 +8,7 @@ export class CustomLoadAction {
   constructor(loadFunction) {
     super();
     this.#loadFunction = loadFunction;
-    this.fetch = (params) => {
+    this.fetch = async (params) => {
       return await loadFunction(params);
     }
   }

@@ -1,29 +1,12 @@
-import { DataStoreLoadAction } from "./DataStoreLoadAction";
-
-import {
-  clearSessionStorage,
-  getItemFromSessionStorage,
-  updateSessionStorage
-} from "../../utils/SessionStorageUtils";
-import {getLocalStorageDataIfPresent} from "../../utils/LocalStorageUtils";
-import {ApiActionType} from "./ApiActionType.js";
-
 /**
  * Class to define a data store load action through an API call.
  */
-export class ApiLoadAction extends DataStoreLoadAction {
-
-  #getRequestConfig;
+export class ApiLoadAction{
 
   constructor(getRequestConfig) {
-    super();
-    this.#getRequestConfig = getRequestConfig;
+    this.getRequestConfig = getRequestConfig;
   }
-
-  getRequestConfig(params){
-    return this.#getRequestConfig(params);
-  }
-  
+ 
 	/**
    * @param params API request parameters
    * @param cacheKey
@@ -31,7 +14,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
    */
   async fetch(params, cacheKey, requestKey){
 
-    const queryConfig = this.#getRequestConfig(params);
+    const queryConfig = this.getRequestConfig(params);
 
     if(!queryConfig.headers){
       queryConfig.headers = {};
@@ -42,10 +25,17 @@ export class ApiLoadAction extends DataStoreLoadAction {
     );
 
     if(cacheKey && requestKey){
-      if(queryConfig.method && queryConfig.method !== ApiActionType.GET){
-        clearSessionStorage();
+      if(queryConfig?.method !== "GET"){
+        for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}))
+        }
       }
-      updateSessionStorage(cacheKey, requestKey, response)
+        
+      const data = JSON.parse(sessionStorage.getItem(cacheKey));
+      data[requestKey] = response;
+      sessionStorage.setItem(cacheKey, JSON.stringify(data));
+
     }
     return response;
   }
@@ -81,8 +71,13 @@ export class ApiLoadAction extends DataStoreLoadAction {
    */
   static async getResponseData(queryConfig){
 
-    const authData = getLocalStorageDataIfPresent("authToken")?.access_token
+    let authData = null;
 
+    const data = window.localStorage.getItem("authToken");
+    if(data){
+      authData = JSON.parse(data).access_token;
+    }
+    
     if (authData) {
       if(queryConfig.headers){
         queryConfig.headers["authToken"] = authData;
@@ -97,7 +92,7 @@ export class ApiLoadAction extends DataStoreLoadAction {
 
       //The replace call is a workaround for an issue with url strings containing double quotes.
       const response = await fetch(queryConfig.url.replace(/"/g, ""), {
-        method: queryConfig.method ?? ApiActionType.GET,
+        method: queryConfig.method ?? "GET",
         headers: queryConfig.headers,
         body: queryConfig.body,
       });
@@ -112,9 +107,11 @@ export class ApiLoadAction extends DataStoreLoadAction {
       }
 
       //Clear cache because there was a likely data update.
-      if(queryConfig.method !== ApiActionType.GET){
-        console.log("Clearing response cache and other data in session storage");
-        clearSessionStorage();
+      if(queryConfig.method !== "GET"){
+       for(let i = 0; i< sessionStorage.length; i++){
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}))
+        }
       }
       return { status: 200 };
     } catch (e) {

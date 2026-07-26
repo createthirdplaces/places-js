@@ -3,7 +3,7 @@ Places.js is human-centric Javascript framework for interactive websites with [c
 Places.js is designed to have a minimal learning curve and faster rendering.
 Performance testing on Firefox with 1000 components shows Places.js
 rendering is more than 16% faster than [React](https://react.dev/) and 23%
-faster than [Lit](https://lit.dev/docs/api/LitElement/) and 
+faster than [Lit](https://lit.dev/docs/api/LitElement/).
 
 The following classes are part of the Places.js API, and documentation can be
 viewed [here](https://createthirdplaces.org/tech/placesjs/reference.html)
@@ -22,7 +22,6 @@ viewed [here](https://createthirdplaces.org/tech/placesjs/reference.html)
 | Places.js | Yes  | Yes   | Yes | 4.7 kB | No |
 | [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | [7.4 kB](https://bundlephobia.com/package/react@19.2.7) | Yes |
 | [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | [15.1 kB](https://bundlephobia.com/package/lit@3.3.3) | No |
-
 
 React and Lit require third party libraries or manual code to fully support the features listed above.
 

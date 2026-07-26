@@ -10,15 +10,7 @@
     <script type="module">
       import {BaseDynamicComponent} from './src/places-js-latest.js'
 
-       export class InnerTestComponent extends BaseDynamicComponent {
-        getTemplateStyle() {
-          return `
-            button {
-              font-size: ${Math.random()+1}em;
-            }
-          `;
-        }
-
+       export class InnerTestComponent extends BaseDynamicComponent { 
         render(){
           return `<button>Test</button>`;
         }
@@ -31,7 +23,9 @@
 
           let self = this;
           let i = setInterval(function (){           
-             if(self.shadowRoot && self.shadowRoot.getHTML().length > 9000){
+             if(self.getRootNode() &&
+             self.getRootNode().documentElement.innerHTML.length >
+             9000){
                 console.log("Rendering time: "+(Date.now()-window.startTime));
                 clearInterval(i);
               }

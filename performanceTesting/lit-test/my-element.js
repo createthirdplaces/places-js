@@ -1,13 +1,7 @@
 import {LitElement, html, css} from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
 
-export class InnerElement extends LitElement {
-  static styles = css`
-    button {
-      font-size: ${Math.random()+1}em;
-    }
-  `;
+export class InnerElement extends LitElement { 
   render() {
-    console.log(Date.now() - window.startTime);
     return html`<button>Test</button>`;
   }
 }
@@ -47,10 +41,8 @@ export class MyElement extends LitElement {
 customElements.define('my-element', MyElement);
 customElements.define('inner-element',InnerElement);
 
-console.log("Done");
 
 document.addEventListener('DOMContentLoaded', function(){
-  console.log("Hi");
-  document.getElementById("app").innerHTML="<h1>Test</h1><my-element></my-element>";
+  document.getElementById("app").innerHTML="<my-element></my-element>";
 });
 

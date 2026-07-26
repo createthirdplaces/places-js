@@ -1,8 +1,9 @@
 Places.js is a lightweight human-centric Javascript framework for creating interactive websites. All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
-
- Places.js is designed to be an alternative to [Lit](https://lit.dev/docs/api/LitElement/) and [React](https://react.dev/).
-
+ Places.js is designed to have a minimal learning curve and faster rendering.
+ Performance testing on Firefox with 1000 components shows Places.js
+ rendering is more than 16% faster than [React](https://react.dev/) and 23%
+ faster than [Lit](https://lit.dev/docs/api/LitElement/) and 
  ## Comparison to React and Lit
 
 | Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size| Build step required |

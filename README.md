@@ -27,10 +27,16 @@ React and Lit require third party libraries or manual code to fully support the 
 
  ## Getting started
 
- To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo. See the places.js documentation at [https://createthirdplaces.org/tech/placesjs.html](https://createthirdplaces.org/tech/placesjs.html) for a more detailed guide
- 
-- [This repo](https://codeberg.org/createthirdplaces/DMVBoardGames/src/branch/main/src/ui) has an example of how places.js is used.
+ To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@main/places-js-latest.js)
 
+### Import example using CDN ###
+   `import { BaseDynamicComponent } from "https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@main/places-js-latest.js";`
+
+### More details
+
+- [API reference](https://createthirdplaces.org/tech/placesjs/reference.html)  
+- [Example of how places.js is used in production](https://codeberg.org/createthirdplaces/DMVBoardGames/src/branch/main/src/ui)
+  
 ## Contributing
 
 Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR. 

@@ -1,4 +1,4 @@
-Places.js is human-centric Javascript framework for interactive websites with [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
+Places.js is a human-centric Javascript framework for interactive websites with [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
 Places.js is designed to have a minimal learning curve and faster rendering.
 Performance testing on Firefox with 1000 components shows Places.js

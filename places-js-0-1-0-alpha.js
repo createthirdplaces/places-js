@@ -41,8 +41,7 @@ class ApiLoadAction{
   }
 
   static async #getErrorData(response, url) {
-
-    let message;
+onfig:signal;
 
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
@@ -120,6 +119,8 @@ class ApiLoadAction{
   }
 }
 
+
+
 class BaseDynamicComponent extends HTMLElement {
 
   #attachedEventsToShadowRoot = false;
@@ -143,7 +144,8 @@ class BaseDynamicComponent extends HTMLElement {
   static prevState = {}; 
   static prevOrdering = {};
   static eventHandlers = {};
- 
+
+  static templateFunctions = {};
   static templateCount = 0;
   templateIds = [];
 
@@ -191,7 +193,6 @@ class BaseDynamicComponent extends HTMLElement {
      
       const signalData = {
         fieldName,
-        templateFuncType,
         attr,
         "signalId":newStr.length > 0 ? i : -1,
         isOuter: endPos < firstTagEnd
@@ -217,14 +218,10 @@ class BaseDynamicComponent extends HTMLElement {
       const tagStart = split[i].indexOf("<");
       if(tagStart > 0 && split[i].charAt(tagStart -1) !== "/"){
         split[i]=split[i].substring(tagStart);
-        console.log(split[i]);
       }
       const tagEnd = split[i].indexOf(">");
       if(tagEnd > 0 && tagEnd < split[i].length - 1 && split[i].charAt(tagEnd-1) !== "/"){
-        console.log(tagEnd); 
-        console.log(split[i]); 
         split[i]=split[i].substring(0,tagEnd+1);
-        console.log(split[i]);
       }
       split[i]=split[i].trim();
       //Insert space for attributes
@@ -234,13 +231,14 @@ class BaseDynamicComponent extends HTMLElement {
     }
     templateStr = split.join("");
 
-    console.log(templateStr);
     BaseDynamicComponent.templateSignals[templateName.toUpperCase()] = signals;
     BaseDynamicComponent.dynamicSignals[templateName.toUpperCase()] = dynamicSignals;
 
     template.innerHTML = templateStr;
-
-    BaseDynamicComponent.templates[templateName.toUpperCase()] = template;
+    BaseDynamicComponent.templateFunctions[templateName] = templateFunc;
+    
+    
+    BaseDynamicComponent.templates[templateName.toUpperCase()] = template.content.firstChild;
     BaseDynamicComponent.prevState[templateName.toUpperCase()]={};
     BaseDynamicComponent.prevOrdering[templateName.toUpperCase()]=[];
   }
@@ -274,14 +272,16 @@ class BaseDynamicComponent extends HTMLElement {
 
  #generateSignal(params){
 
-    const{ 
+		const {
+			fieldName,
+			attr,
+			isOuter,
+			signalId } = params.signalConfig
+    
+		const{ 
       signalData,
-      elementRoot,
-      fieldName,
-      templateFuncType,
-      signalId,
-      isOuter,
-      attr} = params
+      elementRoot
+		} = params.updateData;
     
     let updated = signalData[fieldName];  
     let element;
@@ -295,7 +295,6 @@ class BaseDynamicComponent extends HTMLElement {
   
     if(updated === '') {
       element.removeAttribute(attr);
-      console.log("afds");
     }
     else {
       if(attr==="textContent"){
@@ -388,22 +387,25 @@ class BaseDynamicComponent extends HTMLElement {
       );
     }
   }
-
-  #renderTemplates(data,content) {
  
+  #renderTemplates(data,content) {
+
+    this.#renderTemplates.templateIds = []; 
+    
     if(!this.#templateData){
 
       const templates = content.querySelectorAll("[data-template-name]");
-      if(templates.length >= 0){
-        this.#templateLoaded = true;
-      }
-
-      this.#templateData = [] 
+      
       for(let i=0;i<templates.length;i++){
+
+        if(!this.#templateData){
+          this.#templateData = [];
+        }
         let attrs = [];
         const attrNames = templates[i].getAttributeNames();
         const dataFieldName = templates[i].getAttribute("data-array");
         const dataTemplateName = templates[i].getAttribute("data-template-name");
+
         for(let j=0;j<attrNames.length;j++){
           const attrName = attrNames[j]; 
           const attrValue = templates[i].getAttribute(attrName);
@@ -416,15 +418,21 @@ class BaseDynamicComponent extends HTMLElement {
           });
         }   
        
-        const templateId = `template-${BaseDynamicComponent.templateCount}-${dataTemplateName}`;
-        templates[i].id = templateId; 
+        templates[i].id = `template-${BaseDynamicComponent.templateCount}-${dataTemplateName}`;
+ 
+        this.#renderTemplates.templateIds.push({
+          "id":templates[i].id,
+          "templateName":dataTemplateName
+        });
+        
         this.#templateData.push({
           attributes:attrs,
           dataFieldName:dataFieldName,
-          dataTemplateName: templateId
+          dataTemplateName: templates[i].id
         });
         BaseDynamicComponent.templateCount++;
       } 
+      this.#templateLoaded = true;
     }
     
     for(let i = 0; i < this.#templateData.length;i++){
@@ -450,6 +458,7 @@ class BaseDynamicComponent extends HTMLElement {
           }
         }
       }
+
 
       const prevStateLen = Object.keys(BaseDynamicComponent.prevState[templateName]).length;
     
@@ -479,7 +488,13 @@ class BaseDynamicComponent extends HTMLElement {
       if(added.size > 0){
 
         const lastId = BaseDynamicComponent.prevOrdering[templateName][prevStateLen-1];
-        let addFragment = null; 
+        
+				const sharedData = {};
+				for(let j=0;j<attrData.length;j++){
+					sharedData[attrData[j].name]= data[attrData[j].itemKey];
+				}
+
+				let addFragment = null; 
         for(let num = 0; num < updatedOrdering.length; num++){
           const updateData = updatedOrdering[num]; 
          
@@ -489,43 +504,39 @@ class BaseDynamicComponent extends HTMLElement {
             }
            
             const itemState = state[num];        
-            const rowProps = {...itemState}
- 
-            BaseDynamicComponent.computedProps[templateName].forEach((computedConfig)=>{
-              rowProps[computedConfig.field] = computedConfig.func(rowProps);
-            });
-            for(let j=0;j<attrData.length;j++){
-              rowProps[attrData[j].name] = data[attrData[j].itemKey];
-            }
 
+						const computedProps = {}; 
+            BaseDynamicComponent.computedProps[templateName].forEach((computedConfig)=>{
+              computedProps[computedConfig.field] = computedConfig.func(itemState,sharedData);
+            });
+            
             const signalsToRun = BaseDynamicComponent.templateSignals[templateName];
 
             let addNode = BaseDynamicComponent.templates[templateName].cloneNode(true);
-            
-            signalsToRun.forEach((signal)=>{ 
+						const signalData =  {...computedProps,...itemState}
+
+						signalsToRun.forEach((signal)=>{ 
              
-              if(rowProps[signal.fieldName]){
                 this.#generateSignal(
                   {
-                    ...signal,
-                    ...{
-                      "signalData":rowProps,
-                      "elementRoot":addNode.content.firstChild,
+                    signalConfig:signal,
+                    updateData:{
+                      "signalData":signalData,
+                      "elementRoot":addNode,
                     }
                   }
                 );
-              }
             })
            
-            BaseDynamicComponent.prevState[templateName][updateData] = rowProps;
+            BaseDynamicComponent.prevState[templateName][updateData] = computedProps;
             const eventHandlers = BaseDynamicComponent.eventHandlers[templateName];
             if(eventHandlers){
               this.#setupClickEventListeners(
-                addNode.content.firstChild,
+                addNode,
                 eventHandlers,
                 rowProps);
             }
-            addFragment.appendChild(addNode.content);
+            addFragment.appendChild(addNode);
           }else {
             if(addFragment !== null){
               const curNode = this.getRootNode().getElementById(""+updateData); 
@@ -542,17 +553,17 @@ class BaseDynamicComponent extends HTMLElement {
           if(added.size < newIds.size - removed.size) { 
             const lastNode = this.getRootNode().getElementById(""+lastId);
             const add = document.createDocumentFragment();
-            add.replaceChildren(addFragment);
+            add.replaceChildren(addFragment); 
             requestAnimationFrame(()=>{
               lastNode.parentNode.appendChild(add);
             });
           } else{
-              requestAnimationFrame(()=>{
-                this.getRootNode()
-                  .getElementById(this.#templateData[i].dataTemplateName)
-                  .replaceChildren(addFragment);
-                hasReplaced = true;
-              });
+            requestAnimationFrame(()=>{
+							this.getRootNode()
+								.getElementById(this.#templateData[i].dataTemplateName)
+								.replaceChildren(addFragment);
+							hasReplaced = true;
+						});
           }          
         }
         BaseDynamicComponent.prevOrdering[templateName] = updatedOrdering;
@@ -562,10 +573,11 @@ class BaseDynamicComponent extends HTMLElement {
       if(removed.size > 0) {
         
         if(removed.size === prevIds.size && !hasReplaced){
-          this.getRootNode()
-              .getElementById(this.#templateData[i].dataTemplateName)
-              .replaceChildren([]);
-          BaseDynamicComponent.prevState[templateName] = {};
+
+            this.getRootNode()
+                .getElementById(this.#templateData[i].dataTemplateName)
+                .replaceChildren([]);
+            BaseDynamicComponent.prevState[templateName] = {};
           break; 
         }
 
@@ -607,19 +619,22 @@ class BaseDynamicComponent extends HTMLElement {
         }
         
         if(moveNodes.length > 0){
-          for(let mNum=moveNodes.length-1;mNum>=0;mNum--){
-           
-            const moveData = moveNodes[mNum];
 
-            const nodeToMove = this.getRootNode().getElementById(
-              moveData.moveId);
-          
-            if(moveData.prevNode !== null){
-              moveData.prevNode.parentNode.insertBefore(nodeToMove,moveData.prevNode);
-            } else {
-              nodeToMove.parentNode.appendChild(nodeToMove);
+          requestAnimationFrame(()=>{
+            for(let mNum=moveNodes.length-1;mNum>=0;mNum--){
+             
+              const moveData = moveNodes[mNum];
+
+              const nodeToMove = this.getRootNode().getElementById(
+                moveData.moveId);
+            
+              if(moveData.prevNode !== null){
+                moveData.prevNode.parentNode.insertBefore(nodeToMove,moveData.prevNode);
+              } else {
+                nodeToMove.parentNode.appendChild(nodeToMove);
+              }
             }
-          }
+          });
         }
         BaseDynamicComponent.prevOrdering[templateName] = updatedOrdering; 
       }
@@ -628,52 +643,52 @@ class BaseDynamicComponent extends HTMLElement {
         break;
       }
 
-      //Only should run for changes
       if(sameNumber){
-        for(let num=0;num<state.length;num++){
-       
-          const id = state[num].id;
-          const itemState = state[num];        
-          const rowProps = {...itemState}
-          for(let j=0;j<attrData.length;j++){
-            rowProps[attrData[j].name]= data[attrData[j].itemKey];
-          }
-          
-          let equalState = true;
-        
-          const prevProps = BaseDynamicComponent.prevState[templateName][""+id]          
-          //Calculate computed values.
-          const computed = BaseDynamicComponent.computedProps[templateName];
-          BaseDynamicComponent.computedProps[templateName].forEach((computedConfig)=>{
-            rowProps[computedConfig.field] = computedConfig.func(rowProps);
-            equalState = equalState && rowProps[computedConfig.field] === prevProps[computedConfig.field];
-          });
-                
-          let updatedNode;
-          if(!equalState){
-            const signalsToRun = BaseDynamicComponent.dynamicSignals[templateName];
+				let start = Date.now();
+        //requestAnimationFrame(()=>{
+      	
+					const sharedData = {};
+					for(let j=0;j<attrData.length;j++){
+						sharedData[attrData[j].name]= data[attrData[j].itemKey];
+					}
 
-            signalsToRun.forEach((signalConfig)=>{
-              
-              if(BaseDynamicComponent.prevState[templateName][id][signalConfig.fieldName] !== rowProps[signalConfig.fieldName]){
-                this.#generateSignal(
-                  { 
-                    ...signalConfig,
-                    ...{
-                      "signalData":rowProps,
-                      "elementRoot": document.getElementById(""+id),
-                    }
-                  }
-                );
-              }
-
+					for(let num=0;num<state.length;num++){
+         
+            const id = state[num].id;
+            const itemState = state[num];        
+           
+            const prevProps = BaseDynamicComponent.prevState[templateName][""+id]                   
+						const computedPropValues = {}; 
+						//Calculate computed values.
+            BaseDynamicComponent.computedProps[templateName].forEach((computedConfig)=>{
+              computedPropValues[computedConfig.field] = computedConfig.func(itemState, sharedData);
             });
-            
-            BaseDynamicComponent.prevState[templateName][id] = rowProps;
-          } 
-        }
+
+                  
+            let updatedNode;
+            const signalsToRun = BaseDynamicComponent.dynamicSignals[templateName];
+						signalsToRun.forEach((signalConfig)=>{
+							if(BaseDynamicComponent.prevState[templateName][id][signalConfig.fieldName] !== computedPropValues[signalConfig.fieldName]){
+							
+								this.#generateSignal(
+									{ 
+										signalConfig: signalConfig,
+										updateData: {
+											"signalData":computedPropValues,
+											"elementRoot": document.getElementById(""+id),
+										}
+									}
+								);
+							}
+
+						});
+						
+						BaseDynamicComponent.prevState[templateName][id] = computedPropValues;
+          }
+					console.log(Date.now()-start);
+				//});
       }
-    } 
+    }
   }
  
   #setupClickEventListeners(rootNode,clickEventListeners,params) {
@@ -687,7 +702,9 @@ class BaseDynamicComponent extends HTMLElement {
         else {  
           element.onclick = (e)=>{
             e.preventDefault();
-            clickEventListeners[selector](params);
+						requestAnimationFrame(()=>{
+							clickEventListeners[selector](params);
+						});
           };
         }
       });
@@ -696,7 +713,6 @@ class BaseDynamicComponent extends HTMLElement {
 
   #generateAndSaveHTML(data) {
 
-    //let start = Date.now();
 
     //Don't re-render static HTML if templates are being used.
     if(!this.#templateLoaded){
@@ -732,6 +748,15 @@ class BaseDynamicComponent extends HTMLElement {
       this.#renderTemplates(data,template.content);
       this.innerHTML = template.innerHTML;
 
+      this.#renderTemplates.templateIds.forEach((templateId)=>{
+        
+        const func = BaseDynamicComponent.templateFunctions[templateId.templateName];
+				if(func.clickHandler){ 
+          this.getRootNode().getElementById(templateId.id)
+            .addEventListener("click",func.clickHandler);
+        }
+      });
+
       if(this.clickEventListeners){
         this.#setupClickEventListeners(this.getRootNode(),this.clickEventListeners);  
       }
@@ -766,6 +791,7 @@ class CustomLoadAction {
     };
   }
 }
+
 
 class DataStore {
 

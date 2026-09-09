@@ -1,15 +1,17 @@
-Places.js is a human-centric Javascript framework for interactive websites with [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
+Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity. 
 
-Places.js is designed to have a minimal learning curve and faster rendering.
+The framework includes support for cross-component state management and backend data fetching. Places.js is designed to have a mininal learning curve and be customizable for advanced use.
+
+
 Performance testing on Firefox with 1000 components shows Places.js
 rendering is more than 16% faster than [React](https://react.dev/) and 23%
-faster than [Lit](https://lit.dev/docs/api/LitElement/).
+faster than [Lit](https://lit.dev/docs/api/LitElement/). [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
 The following classes are part of the Places.js API, and documentation can be
 viewed [here](https://createthirdplaces.org/tech/placesjs/reference.html)
 
  - ApiLoadAction: Defines how a data store can be loaded through an API call.
- - BaseDynamicComponent: Base class for a custom element with state management.
+ - PresentationComponent: Base class for a custom element with state management.
  - BaseTemplateComponent: Base class for a custom element that uses shadow DOM.
  - CustomLoadAction: Defines a custom data store load action with direct control
    over async calls.

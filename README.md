@@ -5,21 +5,12 @@ Places.js is a framework for building HTML-first websites with progressive enhan
 - Cross-component state management using signals.
 - Data fetching.
 
-Places.js is designed to have a mininal learning curve and be customizable for advanced use.
 
-Performance testing on Firefox with 1000 components shows Places.js
-rendering is more than 16% faster than [React](https://react.dev/) and 23%
-faster than [Lit](https://lit.dev/docs/api/LitElement/). [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
+Places.js is optimized for fast rendering. Performance benhmarking shows that Places.js outperforms React, Solid, and Svelte.
 
-## Comparison to React and Lit
+![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
 
-| Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Build step required |
-|-----------|------|------ | --- | ------ | -- |
-| Places.js | Yes  | Yes   | Yes  | No |
-| [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | Yes |
-| [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | No |
-
-React and Lit require third party libraries or manual code to fully support the features listed above.
+The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)  of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
 
  ## Getting started
 

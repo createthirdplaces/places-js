@@ -1,7 +1,7 @@
 Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity.  It has these key features.
 
 - No build step required.
-- HTML-first templating with fine-grained reactivity.
+- HTML-first templating with fine-grained reactivity. 
 - Cross-component state management using signals.
 - Data fetching.
 
@@ -35,15 +35,15 @@ React and Lit require third party libraries or manual code to fully support the 
       <h1 id="search-results-header">Event search results</h1>
       <ul data-template=data>
           <li>
-              <a class="btn secondary" href="{url}">
-                  {eventName}
-              </a>
-              <div class="event-time"> 
-                  {eventTime}
-              </div>
-              <div class="event-location"> 
-                  {location}
-              </div> 
+            <a class="btn secondary" href="{url}">
+              {eventName}
+            </a>
+            <div class="event-time"> 
+              {eventTime}
+            </div>
+            <div class="event-location"> 
+              {location}
+            </div> 
           </li>
       </ul>
   </div>

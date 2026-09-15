@@ -6,9 +6,7 @@ Places.js is a framework for building HTML-first websites with progressive enhan
 - Data fetching.
 
 
-Places.js is optimized for fast rendering. Performance benhmarking shows that Places.js outperforms React, Solid, and Svelte.
-
-![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
+Places.js is optimized for fast rendering. Performance benhmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
 
 The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)  of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
 

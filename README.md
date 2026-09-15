@@ -1,6 +1,11 @@
-Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity. 
+Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity.  It has these key features.
 
-The framework includes support for cross-component state management and backend data fetching. Places.js is designed to have a mininal learning curve and be customizable for advanced use.
+- No build step required.
+- HTML-first templating with fine-grained reactivity.
+- Cross-component state management using signals.
+- Data fetching.
+
+Places.js is designed to have a mininal learning curve and be customizable for advanced use.
 
 Performance testing on Firefox with 1000 components shows Places.js
 rendering is more than 16% faster than [React](https://react.dev/) and 23%

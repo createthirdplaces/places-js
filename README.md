@@ -19,11 +19,11 @@ viewed [here](https://createthirdplaces.org/tech/placesjs/reference.html)
    exteranl source.
 ## Comparison to React and Lit
 
-| Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Minified bundle size| Build step required |
+| Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Build step required |
 |-----------|------|------ | --- | ------ | -- |
-| Places.js | Yes  | Yes   | Yes | 4.7 kB | No |
-| [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | [7.4 kB](https://bundlephobia.com/package/react@19.2.7) | Yes |
-| [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | [15.1 kB](https://bundlephobia.com/package/lit@3.3.3) | No |
+| Places.js | Yes  | Yes   | Yes  | No |
+| [React(v19.2)](https://react.dev/)  | No | No  | Yes, except for cross-island state updates. | Yes |
+| [Lit(v3.3.3)](https://lit.dev/docs/api/LitElement/) | No  | No | Yes, except for cross-island state updates. | No |
 
 React and Lit require third party libraries or manual code to fully support the features listed above.
 

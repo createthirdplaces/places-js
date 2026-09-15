@@ -2,21 +2,10 @@ Places.js is a framework for building HTML-first websites with progressive enhan
 
 The framework includes support for cross-component state management and backend data fetching. Places.js is designed to have a mininal learning curve and be customizable for advanced use.
 
-
 Performance testing on Firefox with 1000 components shows Places.js
 rendering is more than 16% faster than [React](https://react.dev/) and 23%
 faster than [Lit](https://lit.dev/docs/api/LitElement/). [custom HTML components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). All code was written by hand without LLM assistance from tools such as ChatGPT or Claude Code, and LLMs will not be used for future changes.
 
-The following classes are part of the Places.js API, and documentation can be
-viewed [here](https://createthirdplaces.org/tech/placesjs/reference.html)
-
- - ApiLoadAction: Defines how a data store can be loaded through an API call.
- - PresentationComponent: Base class for a custom element with state management.
- - BaseTemplateComponent: Base class for a custom element that uses shadow DOM.
- - CustomLoadAction: Defines a custom data store load action with direct control
-   over async calls.
- - DataStore: Stores state that is shared between components or stage from an
-   exteranl source.
 ## Comparison to React and Lit
 
 | Tool  | Asnychronous data fetching | Integrated state mangement and data fetching  | [Islands architecture support](https://jasonformat.com/islands-architecture/) | Build step required |
@@ -29,10 +18,7 @@ React and Lit require third party libraries or manual code to fully support the 
 
  ## Getting started
 
- To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@main/places-js-latest.js)
-
-### Import example using CDN ###
-   `import { BaseDynamicComponent } from "https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@main/places-js-latest.js";`
+ To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 
 ### More details
 
@@ -56,4 +42,4 @@ Run the command `npx terser places-js-latest.js -o places-js-min.js --compress
 --mangle`
  ## Extending Places.js
  
- - Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.  [See the documentation](https://createthirdplaces.org/tech/placesjs.html) for more details on methods that can be overwritten.                                                                 
+ - Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.  

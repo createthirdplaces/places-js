@@ -10,7 +10,6 @@ class DefaultUpdater {
    * @param storeUpdates Updated store data. Fields not specified in storeData will not be updated.
    */
   updateStoreData(storeUpdates,subscribers) {
-    //this.#storeData = storeUpdates;
     for (let i = 0; i < subscribers.length; i++) {
       subscribers[i].updateFromSubscribedStores();
     }
@@ -71,11 +70,30 @@ export class DataStore {
     queryConfig,
     storeName,
   }) {
-    let store = new DataStore(new ApiLoadAction(queryConfig), storeName);
+    
     if (presentationSignals) {
-      store.setupPresentationSignals(presentationSignals);
-    }
-    return store;
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key)=>{
+        if(key !== "update"){
+          isArray = true;
+        }
+      });
+      
+      if(isArray){
+        return new DataStore(
+          new ApiLoadAction(queryConfig),
+          storeName,
+          new ListUpdater(presentationSignals)
+        )
+      } else {
+        return new DataStore(
+          new DataStoreSignal(queryConfig),
+          storeName,
+          new ItemUpdater(presentationSignals)
+        )
+      }
+    } 
+    return new DataStore(new ApiLoadAction(queryConfig), storeName);
   }
 
   static createWithDataStoreSignals({
@@ -87,12 +105,10 @@ export class DataStore {
       throw new Error("storeSignals is undefined");
     }
 
-
     if (presentationSignals) {
       
       let isArray = false;
       Object.keys(presentationSignals).forEach((key)=>{
-        this.#prevOrdering[key]=[];
         if(key !== "update"){
           isArray = true;
         }
@@ -111,9 +127,8 @@ export class DataStore {
           new ItemUpdater(presentationSignals)
         )
       }
-    } else {
-      return new DataStore(new DataStoreSignal(storeSignals), storeName);
     }
+    return new DataStore(new DataStoreSignal(storeSignals), storeName);
   }
 
   static createWithCustomLoadSignal(loadAction, storeName) {
@@ -138,7 +153,8 @@ export class DataStore {
   updateStoreData(storeUpdates){
     this.#storeData = this.#updater.updateStoreData(
       storeUpdates,
-      this.#subscribers
+      this.#subscribers,
+      this.#storeData
     );
   }
 

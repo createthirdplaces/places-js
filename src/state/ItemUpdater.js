@@ -1,4 +1,4 @@
-class SingleItemUpdater {
+export class ItemUpdater {
   
   #presentationSignals;
   #topLevelUpdateFields;
@@ -9,14 +9,16 @@ class SingleItemUpdater {
   }
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
+
+    console.log(prevStoreData);
     let renderUpdates = {};
 
-    for (let i = 0; i < topLevelUpdateFields.length; i++) {
-      const fieldName = topLevelUpdateFields[i];
+    for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {
+      const fieldName = this.#topLevelUpdateFields[i];
       const updateData =
         this.#presentationSignals.update[fieldName](storeUpdates);
 
-      if (updateData !== this.#storeData[fieldName]) {
+      if (!prevStoreData || updateData !== prevStoreData[fieldName]) {
         renderUpdates[fieldName] = updateData;
       }
     }

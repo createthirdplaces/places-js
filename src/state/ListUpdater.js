@@ -1,111 +1,117 @@
-class PresentationUpdater {
+export class ListUpdater {
 
-  #prevOrdering;
+  #listFields = []
+
+  #prevOrdering = [];
   #presentationSignals;
 
   #moved = [];
   #removed= [];
   #updated = [];
   #isClear = false;
+  #isReplace = false;
 
   constructor(presentationSignals){ 
     this.#presentationSignals = presentationSignals; 
+    Object.keys(this.#presentationSignals).forEach((field)=>{
+      if(this.#presentationSignals[field]["update"]){
+        this.#listFields.push(field); 
+      }
+    });
   }
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
+    
     let changeData = new Map();
 
-    
-    Object.keys(storeUpdates).forEach((field) => {
-      if (Array.isArray(storeUpdates[field])) {
 
-        //Assign id value to items.
-        if (this.#presentationSignals[field]?.id) {
-          for (let j = 0; j < storeUpdates[field].length; j++) {
-            storeUpdates[field][j].id = this.#presentationSignals[field].id(
-              storeUpdates[field][j],
-            );
-          }
+    for(let i =0; i<this.#listFields.length;i++){
+      const field = this.#listFields[i];
+      if(!storeUpdates[field]){
+        continue;
+      }
+      //Assign id value to items.
+      if (this.#presentationSignals[field]?.id) {
+        for (let j = 0; j < storeUpdates[field].length; j++) {
+          storeUpdates[field][j].id = this.#presentationSignals[field].id(
+            storeUpdates[field][j],
+          );
         }
+      }
+      
+      const dataItem = storeUpdates[field];
+      const updatedOrdering = [];
 
-        const dataItem = storeUpdates[field];
-        const dataItemOld = this.#prevOrdering[field] || [];
+      const newIds = new Set();
+      const prevIds = new Set();
 
-        const updatedOrdering = [];
-
-        const prevIds = new Set();
-        const newIds = new Set();
-
-        this.#removed = new Set(dataItemOld);
-        let sameLocs = true;
-        for (
-          let num = 0;
-          num < Math.max(dataItem.length, dataItemOld.length);
-          num++
-        ) {
-          if (num < dataItem.length) {
-            updatedOrdering.push(dataItem[num].id);
-            newIds.add(dataItem[num].id);
-            this.#removed.delete(dataItem[num].id);
-          }
-          if (num < dataItemOld.length) {
-            prevIds.add(dataItemOld[num]);
-          }
-          if (!dataItem[num] || dataItem[num].id !== dataItemOld[num]) {
-            sameLocs = false;
-          }
-        }
-
-        let isReplace = false;
-        let added = new Set();
-
-        if (!sameLocs) {
-          if (prevIds.size === 0) {
-            added = newIds;
-          } else {
-            added = sameLocs ? new Set() : newIds.difference(prevIds);
-          }
-          this.#addToSubscribers(added, subscribers);
-        }
-    
-
-        if (!updatedOrdering || updatedOrdering.length === 0) {
-          this.#isClear = true;
-        }
-
-        this.#removeFromSubscribers(this.#removed,storeUpdates);
-        this.#moveItems(updatedOrdering,subscribers,prevStoreData);
+      this.#removed = new Set(dataItemOld);
+      const maxNum = Math.max(dataItem.length, dataItemOld.length);
+      
+      let sameLocs = true;
      
+      for (let num = 0; num < maxNum; num++){
+       if (num < dataItem.length) {
+          updatedOrdering.push(dataItem[num].id);
+          newIds.add(dataItem[num].id);
+          this.#removed.delete(dataItem[num].id);
+        }
+        if (num < dataItemOld.length) {
+          prevIds.add(dataItemOld[num]);
+        }
+        if (!dataItem[num] || dataItem[num].id !== dataItemOld[num]) {
+          sameLocs = false;
+        }
+      }
 
-        if (!isReplace && !isClear) {
-          const arrayChanges = [];
-          const reactiveFields = this.#presentationSignals[field]["update"];
+      this.#isReplace = false;
 
-          for (let i = 0; i < storeUpdates[field].length; i++) {
-            let oldStateRow = this.#storeData[field][i];
+      if (!sameLocs) {
+        let added = new Set();
+        if (prevIds.size === 0) {
+          added = newIds;
+        } else {
+          added = sameLocs ? new Set() : newIds.difference(prevIds);
+        }
+        this.#addToSubscribers(added, subscribers);
+      }
 
-            let hasChanged = false;
-            for (let j = 0; j < reactiveFields.length; j++) {
-              const reactiveName = reactiveFields[j];
+      if (!updatedOrdering || updatedOrdering.length === 0) {
+        this.#isClear = true;
+      }
 
-              const oldState = oldStateRow[reactiveName];
-              const newState = storeUpdates[field][i][reactiveName];
-              if (oldState !== newState) {
-                hasChanged = true;
-              }
-            }
+      this.#removeFromSubscribers(this.#removed,subscribers,storeUpdates,prevStoreData);
+      this.#moveItems(updatedOrdering,subscribers,prevStoreData); 
 
-            if (hasChanged) {
-              arrayChanges.push(storeUpdates[field][i]);
+      if(!this.#isReplace && !this.#isClear){
+        const arrayChanges = [];
+        const reactiveFields = this.#presentationSignals[field]["update"];
+
+        for (let i = 0; i < storeUpdates[field].length; i++) {
+          let oldStateRow = prevStoreData[field][i];
+
+          let hasChanged = false;
+          for (let j = 0; j < reactiveFields.length; j++) {
+            const reactiveName = reactiveFields[j];
+
+            const oldState = oldStateRow[reactiveName];
+            const newState = storeUpdates[field][i][reactiveName];
+            if (oldState !== newState) {
+              hasChanged = true;
             }
           }
-          changeData.set(field, arrayChanges);
+
+          if (hasChanged) {
+            arrayChanges.push(storeUpdates[field][i]);
+          }
         }
+        changeData.set(field, arrayChanges);
       } else {
+
         changeData[field] = storeUpdates[field];
       }
-    });
-    
+    }
+ 
     //Look at storeUpdates if changeData is empty
     if (changeData.size === 0) {
       changeData = new Map();
@@ -116,16 +122,14 @@ class PresentationUpdater {
       });
     }
     if (changeData.size > 0) {
-      this.#updates = this.#generatePresentationUpdates(changeData);
-        for (let i = 0; i < this.#subscribers.length; i++) {
-          this.#subscribers[i].updateVisible(this.#updates);
-        }
+      this.#updated = this.#generatePresentationUpdates(changeData, prevStoreData);
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].updateVisible(this.#updated);
       }
-
-      Object.keys(storeUpdates).forEach((field) => {
-        this.#storeData[field] = storeUpdates[field];
-      });
     }
+
+    return storeUpdates;
+  
   }
 
   #addToSubscribers(added,subscribers) {
@@ -175,24 +179,24 @@ class PresentationUpdater {
     }
   }
 
-  #removeFromSubscribers(removed, storeUpdates){
+  #removeFromSubscribers(removed,subscribers, storeUpdates,prevStoreData){
     if (removed.size > 0) {
       let updatedPrev = [];
 
-      for (let a = 0; a < this.#storeData[field].length; a++) {
-        const item = this.#storeData[field][a];
-        if (!this.#presentationUpdates["removed"].has(item.id)) {
+      for (let a = 0; a < prevStoreData[field].length; a++) {
+        const item = prevStoreData[field][a];
+        if (!this.#removed.has(item.id)) {
           updatedPrev.push(item);
         }
       }
 
       storeUpdates[field] = updatedPrev;
       this.#prevOrdering[field] = updatedOrdering;
-      for (let i = 0; i < this.#subscribers.length; i++) {
-        this.#subscribers[i].removeItems(
-          this.#presentationUpdates["removed"],
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].removeItems(
+          this.#removed,
           isReplace,
-          this.#presentationUpdates["isClear"],
+          this.#isClear,
         );
       }
     }
@@ -214,12 +218,12 @@ class PresentationUpdater {
             insertBefore = updatedOrdering[num + 1];
           }
 
-          this.#presentationUpdates["moved"].push({
+          this.#moved.push({
             moveNodeId: updatedOrdering[num],
             moveBeforeId: insertBefore,
           });
 
-          for (let a = 0; a < this.#storeData[field].length; a++) {
+          for (let a = 0; a < prevStoreData[field].length; a++) {
             const item = prevStoreData[field][a];
 
             if (a + 1 === updatedOrdering[num]) {
@@ -233,10 +237,11 @@ class PresentationUpdater {
           }
         }
       }
+    }
 
-    for (let a = 0; a < this.#subscribers.length; a++) {
+    for (let a = 0; a < subscribers.length; a++) {
       subscribers[a].swapUpdates(
-        this.#presentationUpdates["moved"],
+        this.#moved,
       );
     }
     for (let a = swapUpdates.length - 1; a >= 0; a--) {
@@ -247,7 +252,7 @@ class PresentationUpdater {
     this.#prevOrdering[field] = updatedOrdering;
   }
 
-  #generatePresentationUpdates(updates) {
+  #generatePresentationUpdates(updates,prevStoreData) {
     const presentationUpdates = {};
 
     const keys = Object.keys(this.#presentationSignals);
@@ -257,7 +262,7 @@ class PresentationUpdater {
       const presentationField =
         this.#presentationSignals[key]["presentationField"] || key;
 
-      const dataToUpdate = this.#storeData[presentationField];
+      const dataToUpdate = updates[presentationField];
 
       if (Array.isArray(dataToUpdate)) {
         presentationUpdates[presentationField] = {};
@@ -281,14 +286,14 @@ class PresentationUpdater {
         if (typeof update === "function") {
           //TODO: Add check if state field is array.
           changeData = update({
-            prevState: this.#storeData[stateField],
+            prevState: prevStoreData[stateField],
             newState: updates.get(stateField),
           });
         } else {
           changeData = { param: updates.get(stateField) };
         }
 
-        const dataToUpdate = this.#storeData[presentationField];
+        const dataToUpdate = prevStoreData[presentationField];
 
         if (Array.isArray(dataToUpdate)) {
           for (let j = 0; j < changeData.length; j++) {
@@ -332,12 +337,6 @@ class PresentationUpdater {
         }
         presentationUpdates[stateField] = changeData;
       }
-
-
+    }
   }
-
-
-
-
-
 }

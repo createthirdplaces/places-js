@@ -1,34 +1,31 @@
 export class ListUpdater {
-
-  #listFields = []
+  #listFields = [];
 
   #prevOrdering = {};
   #presentationSignals;
 
   #moved = [];
-  #removed= [];
+  #removed = [];
   #updated = [];
   #isClear = false;
   #isReplace = false;
 
-  constructor(presentationSignals){ 
-    this.#presentationSignals = presentationSignals; 
-    Object.keys(this.#presentationSignals).forEach((field)=>{
-      if(this.#presentationSignals[field]["update"]){
-        this.#listFields.push(field); 
+  constructor(presentationSignals) {
+    this.#presentationSignals = presentationSignals;
+    Object.keys(this.#presentationSignals).forEach((field) => {
+      if (this.#presentationSignals[field]["update"]) {
+        this.#listFields.push(field);
         this.#prevOrdering[field] = [];
       }
     });
   }
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
-    
     let changeData = new Map();
 
-
-    for(let i =0; i<this.#listFields.length;i++){
+    for (let i = 0; i < this.#listFields.length; i++) {
       const field = this.#listFields[i];
-      if(!storeUpdates[field]){
+      if (!storeUpdates[field]) {
         continue;
       }
       //Assign id value to items.
@@ -39,7 +36,7 @@ export class ListUpdater {
           );
         }
       }
-      
+
       const dataItem = storeUpdates[field];
       const updatedOrdering = [];
 
@@ -50,11 +47,11 @@ export class ListUpdater {
 
       this.#removed = new Set(prevOrdering);
       const maxNum = Math.max(dataItem.length, prevOrdering.length);
-      
+
       let sameLocs = true;
-   
-      for (let num = 0; num < maxNum; num++){
-       if (num < dataItem.length) {
+
+      for (let num = 0; num < maxNum; num++) {
+        if (num < dataItem.length) {
           updatedOrdering.push(dataItem[num].id);
           newIds.add(dataItem[num].id);
           this.#removed.delete(dataItem[num].id);
@@ -76,17 +73,30 @@ export class ListUpdater {
         } else {
           added = sameLocs ? new Set() : newIds.difference(prevIds);
         }
-        this.#addToSubscribers(added, subscribers, field, updatedOrdering, dataItem);
+        this.#addToSubscribers(
+          added,
+          subscribers,
+          field,
+          updatedOrdering,
+          dataItem,
+        );
       }
 
       if (!updatedOrdering || updatedOrdering.length === 0) {
         this.#isClear = true;
       }
 
-      this.#removeFromSubscribers(this.#removed,subscribers,storeUpdates,prevStoreData,field,updatedOrdering);
-      this.#moveItems(updatedOrdering,subscribers,prevStoreData,field); 
+      this.#removeFromSubscribers(
+        this.#removed,
+        subscribers,
+        storeUpdates,
+        prevStoreData,
+        field,
+        updatedOrdering,
+      );
+      this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
 
-      if(!this.#isReplace && !this.#isClear){
+      if (!this.#isReplace && !this.#isClear) {
         const arrayChanges = [];
         const reactiveFields = this.#presentationSignals[field]["update"];
 
@@ -110,11 +120,10 @@ export class ListUpdater {
         }
         changeData.set(field, arrayChanges);
       } else {
-
         changeData[field] = storeUpdates[field];
       }
     }
- 
+
     //Look at storeUpdates if changeData is empty
     if (changeData.size === 0) {
       changeData = new Map();
@@ -125,17 +134,19 @@ export class ListUpdater {
       });
     }
     if (changeData.size > 0) {
-      this.#updated = this.#generatePresentationUpdates(changeData, prevStoreData);
+      this.#updated = this.#generatePresentationUpdates(
+        changeData,
+        prevStoreData,
+      );
       for (let i = 0; i < subscribers.length; i++) {
         subscribers[i].updateVisible(this.#updated);
       }
     }
 
     return storeUpdates;
-  
   }
 
-  #addToSubscribers(added,subscribers,field,updatedOrdering,dataItem) {
+  #addToSubscribers(added, subscribers, field, updatedOrdering, dataItem) {
     if (added.size > 0) {
       let addFragments = [];
       let addFragment = null;
@@ -183,14 +194,13 @@ export class ListUpdater {
   }
 
   #removeFromSubscribers(
-    removed, 
-    subscribers, 
-    storeUpdates, 
+    removed,
+    subscribers,
+    storeUpdates,
     prevStoreData,
     field,
-    updatedOrdering
-  )
-  {
+    updatedOrdering,
+  ) {
     if (removed.size > 0) {
       let updatedPrev = [];
 
@@ -213,7 +223,7 @@ export class ListUpdater {
     }
   }
 
-  #moveItems(updatedOrdering,subscribers,prevStoreData, field){
+  #moveItems(updatedOrdering, subscribers, prevStoreData, field) {
     let sameNumber = false;
     if (
       !this.#isReplace &&
@@ -250,21 +260,17 @@ export class ListUpdater {
       }
 
       for (let a = 0; a < subscribers.length; a++) {
-        subscribers[a].swapUpdates(
-          this.#moved,
-        );
+        subscribers[a].swapUpdates(this.#moved);
       }
       for (let a = swapUpdates.length - 1; a >= 0; a--) {
         const swapItem = swapUpdates[a];
-        prevStoreData[field][swapItem.updateIndex] =
-          swapItem.updateData;
+        prevStoreData[field][swapItem.updateIndex] = swapItem.updateData;
       }
       this.#prevOrdering[field] = updatedOrdering;
-
     }
   }
 
-  #generatePresentationUpdates(updates,prevStoreData) {
+  #generatePresentationUpdates(updates, prevStoreData) {
     const presentationUpdates = {};
 
     const keys = Object.keys(this.#presentationSignals);

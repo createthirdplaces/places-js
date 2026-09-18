@@ -1,4 +1,3 @@
-
 /**
  * Class to determine a custom load action that includes a dependenccy on other stores
  **/

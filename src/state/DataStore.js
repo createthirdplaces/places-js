@@ -1,25 +1,23 @@
-import {ApiLoadAction} from './ApiLoadAction.js'
-import {CustomLoadSignal} from './CustomLoadSignal.js'
-import {DataStoreSignal} from './DataStoreSignal.js'
-import {ItemUpdater} from './ItemUpdater.js'
-import {ListUpdater} from './ListUpdater.js'
+import { ApiLoadAction } from "./ApiLoadAction.js";
+import { CustomLoadSignal } from "./CustomLoadSignal.js";
+import { DataStoreSignal } from "./DataStoreSignal.js";
+import { ItemUpdater } from "./ItemUpdater.js";
+import { ListUpdater } from "./ListUpdater.js";
 
 class DefaultUpdater {
   /**
    * Update data in the store and trigger a render of components subscribed to the store.
    * @param storeUpdates Updated store data. Fields not specified in storeData will not be updated.
    */
-  updateStoreData(storeUpdates,subscribers) {
+  updateStoreData(storeUpdates, subscribers) {
     for (let i = 0; i < subscribers.length; i++) {
       subscribers[i].updateFromSubscribedStores();
     }
     return storeUpdates;
   }
-
 }
 
 export class DataStore {
-  
   static #storeCount = 0;
   static #storeNameMap = new Map();
 
@@ -36,18 +34,19 @@ export class DataStore {
 
   #updater;
 
-  constructor(loadAction, storeName, updater=new DefaultUpdater()) {
-
+  constructor(loadAction, storeName, updater = new DefaultUpdater()) {
     this.#subscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
-    
+
     this.#updater = updater;
 
     sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
 
     if (storeName) {
       if (DataStore.#storeNameMap.has(storeName)) {
-        throw new Error("Cannot create new store with duplicate name:" + storeName);
+        throw new Error(
+          "Cannot create new store with duplicate name:" + storeName,
+        );
       }
       DataStore.#storeNameMap.set(storeName, this);
     }
@@ -70,29 +69,28 @@ export class DataStore {
     queryConfig,
     storeName,
   }) {
-    
     if (presentationSignals) {
       let isArray = false;
-      Object.keys(presentationSignals).forEach((key)=>{
-        if(key !== "update"){
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
           isArray = true;
         }
       });
-      
-      if(isArray){
+
+      if (isArray) {
         return new DataStore(
           new ApiLoadAction(queryConfig),
           storeName,
-          new ListUpdater(presentationSignals)
-        )
+          new ListUpdater(presentationSignals),
+        );
       } else {
         return new DataStore(
           new DataStoreSignal(queryConfig),
           storeName,
-          new ItemUpdater(presentationSignals)
-        )
+          new ItemUpdater(presentationSignals),
+        );
       }
-    } 
+    }
     return new DataStore(new ApiLoadAction(queryConfig), storeName);
   }
 
@@ -106,26 +104,25 @@ export class DataStore {
     }
 
     if (presentationSignals) {
-      
       let isArray = false;
-      Object.keys(presentationSignals).forEach((key)=>{
-        if(key !== "update"){
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
           isArray = true;
         }
       });
-      
-      if(isArray){
+
+      if (isArray) {
         return new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
-          new ListUpdater(presentationSignals)
-        )
+          new ListUpdater(presentationSignals),
+        );
       } else {
         return new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
-          new ItemUpdater(presentationSignals)
-        )
+          new ItemUpdater(presentationSignals),
+        );
       }
     }
     return new DataStore(new DataStoreSignal(storeSignals), storeName);
@@ -150,11 +147,11 @@ export class DataStore {
     return this.#storeData;
   }
 
-  updateStoreData(storeUpdates){
+  updateStoreData(storeUpdates) {
     this.#storeData = this.#updater.updateStoreData(
       storeUpdates,
       this.#subscribers,
-      this.#storeData || []
+      this.#storeData || [],
     );
   }
 
@@ -206,7 +203,7 @@ export class DataStore {
       // Make an API call if a cached response does not exist.
       if (response === null) {
         //Replace component with loading indicator if one exists.
-       
+
         if (dataStore) {
           const dataStoreSubscribedComponents =
             dataStore.getSubscribedComponents();
@@ -223,7 +220,7 @@ export class DataStore {
 
       this.updateStoreData(response);
 
-      this.#isLoading = false; 
+      this.#isLoading = false;
 
       if (dataStore) {
         const dataStoreSubscribedComponents =
@@ -238,20 +235,14 @@ export class DataStore {
   }
 
   unsubscribeComponent(subscriber) {
-    this.#subscribers.splice(
-      this.#subscribers.indexOf(subscriber),
-      1,
-    );
+    this.#subscribers.splice(this.#subscribers.indexOf(subscriber), 1);
   }
 
   subscribeComponent(subscriber) {
     let i = 0;
     while (i < this.#subscribers.length) {
       if (this.#subscribers[i] === subscriber) {
-        this.#subscribers = this.#subscribers.splice(
-          i,
-          1,
-        );
+        this.#subscribers = this.#subscribers.splice(i, 1);
         break;
       }
       i++;
@@ -259,5 +250,3 @@ export class DataStore {
     this.#subscribers.push(subscriber);
   }
 }
-
-

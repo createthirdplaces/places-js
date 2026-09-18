@@ -1,15 +1,13 @@
 export class ItemUpdater {
-  
   #presentationSignals;
   #topLevelUpdateFields;
 
-  constructor(presentationSignals){ 
+  constructor(presentationSignals) {
     this.#presentationSignals = presentationSignals;
     this.#topLevelUpdateFields = Object.keys(presentationSignals.update);
   }
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
-
     let renderUpdates = {};
 
     for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {
@@ -29,5 +27,4 @@ export class ItemUpdater {
     }
     return storeUpdates;
   }
-
 }

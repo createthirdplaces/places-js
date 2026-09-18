@@ -1,5 +1,4 @@
 export class TemplateItem {
-
   #changeTemplateEvents;
   #changeTemplateHandlers;
 
@@ -63,7 +62,6 @@ export class TemplateItem {
               key: key,
             });
 
-       
             const handlerName = changeTemplateEvents[changeId];
             changeTemplateHandlers[handlerName]({
               componentId: componentId,

@@ -1,12 +1,11 @@
-import {DataStore} from "../state/DataStore.js"
-import {TemplateItem} from "./TemplateItem";
+import { DataStore } from "../state/DataStore.js";
+import { TemplateItem } from "./TemplateItem";
 
 export class PresentationComponent extends HTMLElement {
-
   #changeTemplateEvents = {};
   #clickTemplateEvents = {};
 
-  #lightDomHTML = "<p>Use light DOM or render() method to show HTML</p>"; 
+  #lightDomHTML = "<p>Use light DOM or render() method to show HTML</p>";
   #loadingAnimationStart;
   #loadingIndicatorConfig;
 
@@ -20,8 +19,8 @@ export class PresentationComponent extends HTMLElement {
   static changeHandlerCount = 0;
 
   /**
-   * @param dataStore The data store a component is subscribed to. 
-   * @param loadingIndicatorConfig Configuration for the loading indicator 
+   * @param dataStore The data store a component is subscribed to.
+   * @param loadingIndicatorConfig Configuration for the loading indicator
    **/
   constructor(dataStore) {
     super();
@@ -30,13 +29,14 @@ export class PresentationComponent extends HTMLElement {
 
   startLoadingIndicator() {
     this.#lightDomHTML = this.innerHTML;
-    this.innerHTML = this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
+    this.innerHTML =
+      this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
     this.#loadingAnimationStart = Date.now();
   }
 
   connectedCallback() {
     const defaultStore = this.dataset["store"];
-    
+
     if (defaultStore) {
       const loadingIndicatorComponent = this.dataset["loadingIndicator"];
       if (loadingIndicatorComponent) {
@@ -57,8 +57,8 @@ export class PresentationComponent extends HTMLElement {
       }
 
       const dataStore = DataStore.getStore(defaultStore);
-      this.#subscribedStore = DataStore.getStore(defaultStore)
-       
+      this.#subscribedStore = DataStore.getStore(defaultStore);
+
       dataStore.subscribeComponent(this);
     }
 
@@ -80,12 +80,11 @@ export class PresentationComponent extends HTMLElement {
   }
 
   #generateSignal(params) {
-    const { fieldName, attr, signalId, signalPath } =
-      params.signalConfig;
+    const { fieldName, attr, signalId, signalPath } = params.signalConfig;
 
     const { signalData, elementRoot } = params.updateData;
 
-    if(signalData[fieldName] === undefined){
+    if (signalData[fieldName] === undefined) {
       return;
     }
 
@@ -213,14 +212,14 @@ export class PresentationComponent extends HTMLElement {
             signalConfig: signalConfig,
             updateData: {
               signalData: state,
-              elementRoot: this.#templateItem.getNode(0)
+              elementRoot: this.#templateItem.getNode(0),
             },
           });
         }
       }
     }
   }
- 
+
   async addItems(addFragments) {
     if (this.#loadingAnimationStart) {
       await this.#completeLoadAnimation();
@@ -250,13 +249,13 @@ export class PresentationComponent extends HTMLElement {
           }
 
           //if(insertData[k][signalConfig.fieldName]){
-            this.#generateSignal({
-              signalConfig: signalConfig,
-              updateData: {
-                signalData: insertData[k],
-                elementRoot: addNode,
-              },
-            });
+          this.#generateSignal({
+            signalConfig: signalConfig,
+            updateData: {
+              signalData: insertData[k],
+              elementRoot: addNode,
+            },
+          });
           //}
         }
         addFragment.appendChild(addNode);

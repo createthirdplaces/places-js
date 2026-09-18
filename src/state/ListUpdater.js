@@ -2,7 +2,7 @@ export class ListUpdater {
 
   #listFields = []
 
-  #prevOrdering = [];
+  #prevOrdering = {};
   #presentationSignals;
 
   #moved = [];
@@ -16,6 +16,7 @@ export class ListUpdater {
     Object.keys(this.#presentationSignals).forEach((field)=>{
       if(this.#presentationSignals[field]["update"]){
         this.#listFields.push(field); 
+        this.#prevOrdering[field] = [];
       }
     });
   }
@@ -45,21 +46,23 @@ export class ListUpdater {
       const newIds = new Set();
       const prevIds = new Set();
 
-      this.#removed = new Set(dataItemOld);
-      const maxNum = Math.max(dataItem.length, dataItemOld.length);
+      const prevOrdering = this.#prevOrdering[field];
+
+      this.#removed = new Set(prevOrdering);
+      const maxNum = Math.max(dataItem.length, prevOrdering.length);
       
       let sameLocs = true;
-     
+   
       for (let num = 0; num < maxNum; num++){
        if (num < dataItem.length) {
           updatedOrdering.push(dataItem[num].id);
           newIds.add(dataItem[num].id);
           this.#removed.delete(dataItem[num].id);
         }
-        if (num < dataItemOld.length) {
-          prevIds.add(dataItemOld[num]);
+        if (num < prevOrdering.length) {
+          prevIds.add(prevOrdering[num]);
         }
-        if (!dataItem[num] || dataItem[num].id !== dataItemOld[num]) {
+        if (!dataItem[num] || dataItem[num].id !== prevOrdering[num]) {
           sameLocs = false;
         }
       }
@@ -73,15 +76,15 @@ export class ListUpdater {
         } else {
           added = sameLocs ? new Set() : newIds.difference(prevIds);
         }
-        this.#addToSubscribers(added, subscribers);
+        this.#addToSubscribers(added, subscribers, field, updatedOrdering, dataItem);
       }
 
       if (!updatedOrdering || updatedOrdering.length === 0) {
         this.#isClear = true;
       }
 
-      this.#removeFromSubscribers(this.#removed,subscribers,storeUpdates,prevStoreData);
-      this.#moveItems(updatedOrdering,subscribers,prevStoreData); 
+      this.#removeFromSubscribers(this.#removed,subscribers,storeUpdates,prevStoreData,field,updatedOrdering);
+      this.#moveItems(updatedOrdering,subscribers,prevStoreData,field); 
 
       if(!this.#isReplace && !this.#isClear){
         const arrayChanges = [];
@@ -132,7 +135,7 @@ export class ListUpdater {
   
   }
 
-  #addToSubscribers(added,subscribers) {
+  #addToSubscribers(added,subscribers,field,updatedOrdering,dataItem) {
     if (added.size > 0) {
       let addFragments = [];
       let addFragment = null;
@@ -169,7 +172,7 @@ export class ListUpdater {
           insertBefore: -1,
           insertData: addFragment,
         });
-        isReplace = true;
+        this.#isReplace = true;
       }
       this.#prevOrdering[field] = updatedOrdering;
 
@@ -179,7 +182,15 @@ export class ListUpdater {
     }
   }
 
-  #removeFromSubscribers(removed,subscribers, storeUpdates,prevStoreData){
+  #removeFromSubscribers(
+    removed, 
+    subscribers, 
+    storeUpdates, 
+    prevStoreData,
+    field,
+    updatedOrdering
+  )
+  {
     if (removed.size > 0) {
       let updatedPrev = [];
 
@@ -195,17 +206,17 @@ export class ListUpdater {
       for (let i = 0; i < subscribers.length; i++) {
         subscribers[i].removeItems(
           this.#removed,
-          isReplace,
+          this.#isReplace,
           this.#isClear,
         );
       }
     }
   }
 
-  #moveItems(updatedOrdering,subscribers,prevStoreData){
+  #moveItems(updatedOrdering,subscribers,prevStoreData, field){
     let sameNumber = false;
     if (
-      !isReplace &&
+      !this.#isReplace &&
       updatedOrdering.length === this.#prevOrdering[field].length
     ) {
       sameNumber = true;
@@ -237,19 +248,20 @@ export class ListUpdater {
           }
         }
       }
-    }
 
-    for (let a = 0; a < subscribers.length; a++) {
-      subscribers[a].swapUpdates(
-        this.#moved,
-      );
+      for (let a = 0; a < subscribers.length; a++) {
+        subscribers[a].swapUpdates(
+          this.#moved,
+        );
+      }
+      for (let a = swapUpdates.length - 1; a >= 0; a--) {
+        const swapItem = swapUpdates[a];
+        prevStoreData[field][swapItem.updateIndex] =
+          swapItem.updateData;
+      }
+      this.#prevOrdering[field] = updatedOrdering;
+
     }
-    for (let a = swapUpdates.length - 1; a >= 0; a--) {
-      const swapItem = swapUpdates[a];
-      prevStoreData[field][swapItem.updateIndex] =
-        swapItem.updateData;
-    }
-    this.#prevOrdering[field] = updatedOrdering;
   }
 
   #generatePresentationUpdates(updates,prevStoreData) {
@@ -338,5 +350,6 @@ export class ListUpdater {
         presentationUpdates[stateField] = changeData;
       }
     }
+    return presentationUpdates;
   }
 }

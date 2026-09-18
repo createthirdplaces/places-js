@@ -10,7 +10,6 @@ export class ItemUpdater {
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
 
-    console.log(prevStoreData);
     let renderUpdates = {};
 
     for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {

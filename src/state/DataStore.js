@@ -154,7 +154,7 @@ export class DataStore {
     this.#storeData = this.#updater.updateStoreData(
       storeUpdates,
       this.#subscribers,
-      this.#storeData
+      this.#storeData || []
     );
   }
 
@@ -223,15 +223,7 @@ export class DataStore {
 
       this.updateStoreData(response);
 
-      this.#isLoading = false;
-
-      //Should only run if presentation signals are being used.
-      if (Object.keys(this.#presentationSignals).length === 0) {
-        for (let i = 0; i < this.#subscribers.length; i++) {
-          this.#subscribers[i].unlockComponent(this);
-          this.#subscribers[i].updateFromSubscribedStores();
-        }
-      }
+      this.#isLoading = false; 
 
       if (dataStore) {
         const dataStoreSubscribedComponents =

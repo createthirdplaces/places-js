@@ -1,18 +1,11 @@
-import {useEffect} from 'react'
-
+import { useEffect } from "react";
 
 function TestComponent() {
-
   return (
     <>
-        <button
-        >
-        Test
-        </button>
-
-
+      <button>Test</button>
     </>
-  )
+  );
 }
 
-export default TestComponent
+export default TestComponent;

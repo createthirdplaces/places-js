@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "eslint": "^9.39.5",
-    "nodemon": "^3.1.14",
     "npm-watch": "^0.13.0",
     "rollup": "^4.63.3"
   }

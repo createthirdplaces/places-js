@@ -1,25 +1,25 @@
-Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity.  It has these key features.
+Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity. It has these key features.
 
 - No build step required.
-- HTML-first templating with fine-grained reactivity. 
+- HTML-first templating with fine-grained reactivity.
 - Cross-component state management using signals.
 - Data fetching.
 
-
 Places.js is optimized for fast rendering. Performance benhmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
 
-The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)  of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
+The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js) of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
 
- ## Getting started
+## Getting started
 
- To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 
 ## Examples
 
 ### Creating a component with a template to list events
+
 ```
 <presentation-component data-store = "search-results-store">
-  <div> 
+  <div>
       <p id="no-events-found">No events found</p>
       <h1 id="search-results-header">Event search results</h1>
       <ul data-template=data>
@@ -27,17 +27,18 @@ The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel C
             <a class="btn secondary" href="{url}">
               {eventName}
             </a>
-            <div class="event-time"> 
+            <div class="event-time">
               {eventTime}
             </div>
-            <div class="event-location"> 
+            <div class="event-location">
               {location}
-            </div> 
+            </div>
           </li>
       </ul>
   </div>
 </presentation-component>
 ```
+
 ### Defining a store for component with backend data fetching and reactivity configured by signals.
 
 ```
@@ -73,11 +74,11 @@ const presentationSignals = {
       eventTime: (eventData) => {
         if (eventData.isRecurring) {
           return `
-            ${eventData.dayOfWeek}s at 
+            ${eventData.dayOfWeek}s at
             ${eventData.nextEventTime}`;
         }
         return `
-          ${eventData.nextEventDate} at 
+          ${eventData.nextEventDate} at
           ${eventData.nextEventTime}`;
       },
       location: (eventData) => {
@@ -105,16 +106,16 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 <search-component
   api-url="/searchEvents"
   data-store="search-component-store"
-  id="search-section" 
+  id="search-section"
 >
   <div data-template>
       {#if isMobile}
         <details open>
           <summary class="btn secondary">Modify search parameters</summary>
-          <form id=${SEARCH_FORM_ID} onsubmit="return false">		
+          <form id=${SEARCH_FORM_ID} onsubmit="return false">
             {{>searchTemplate}}
           </form>
-          </hr> 
+          </hr>
         </details>
       {else}
         <form onsubmit="return false">
@@ -130,19 +131,19 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 
 ## Contributing
 
-Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR. 
+Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR.
 
 Also, places.js has a zero LLM use policy. In accordance with the policy, these rules should be followed:
 
- - All PRs and issues should be created without LLM assistance. 
- - Comments on PRs or issues should be created without LLM assistance.
- - Skill files or other files used to support LLM use should not be added.
-
+- All PRs and issues should be created without LLM assistance.
+- Comments on PRs or issues should be created without LLM assistance.
+- Skill files or other files used to support LLM use should not be added.
 
 ## Creating a minified build
 
 Run the command `npx terser places-js-latest.js -o places-js-min.js --compress
 --mangle`
- ## Extending Places.js
- 
- - Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.  
+
+## Extending Places.js
+
+- Places.js prioritizes a minialist feature set. Developers are encouraged to create custom implementations of the Places.js component and data store classes.

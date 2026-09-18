@@ -1,17 +1,11 @@
 function Button() {
-
   return (
     <>
-        <button
-          type="button"
-          className="counter"
-        >
+      <button type="button" className="counter">
         Test
-        </button>
-
-
+      </button>
     </>
-  )
+  );
 }
 
-export default Button
+export default Button;

@@ -1,7 +1,6 @@
-
 export default {
   input: "./src/index.js",
   output: {
-    file: './dist/places-js.esm.js',
-  }
+    file: "./dist/places-js.esm.js",
+  },
 };

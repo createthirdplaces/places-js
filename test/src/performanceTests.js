@@ -1,18 +1,23 @@
 export class PerformanceTests {
 
-  getName() {
-    //TODO Return name of this class.
+  getName(){
+    return "performance-tests";
   }
 
-  getTests(){
-    //TODO: Go through all the functiosn and return the ones that have a prefix
-    //of "test" in the function name.
-
+  testStorePerformance_addLargeList() {    
+    assertMessage({time: 22});
   }
 
-  testStorePerformance_addLargeList() {
+  testFillerTest() {
+    assertResult({time: 22, success: false, error: "Test not implemented"});
+  }
 
-    //TODO: Run test and show result.
+  testFillerTest_Two(){
+    assertTrue(true);
+  }
+
+  testFillerTest_Three(){
+    assertEquals(1,1);
   }
 
 

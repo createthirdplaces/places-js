@@ -2,23 +2,54 @@
   <head>
     <script type="module">
 
-      import {TestResultComponent} from '/lib/TestResultComponent.js';
       import  {TestRunner} from '/lib/TestRunner.js';
+      import {PerformanceTests} from '/src/performanceTests.js';
+      import {PresentationComponent} from '/lib/places-js-min.js'; 
 
-      import {PerformanceTests} from '/tests/performanceTests.js';
+      customElements.define('presentation-component',PresentationComponent);
+ 
+      const tests = [
+        new PerformanceTests()
+      ];
+      
+      window.addEventListener("load",()=>{
 
-      customElements.define('test-component',TestResultComponent);
+        const testDOM = [];
 
-      const testNameA = 'performance-tests'
-      const t
+        for(let i=0; i<tests.length;i++){
+
+          const test = tests[i];
+          TestRunner.createRunnerWithTests(test);
+
+          testDOM.push(`
+            <presentation-component
+              data-store="${test.getName()}"  
+            >
+              <ul data-template>
+                <li>
+                  <span>Test result</span>
+                  <span>{message}</span>
+                </li>
+              </ul>
+            </presentation-component>
+          `);
+        }
+        document.getElementById("test-results")
+          .innerHTML = testDOM.join("\n");
+
+        document.getElementById("run-all",()=>{
+          TestRunner.runAllTests(); 
+        });
+      });
       
     </script>
   </head>
   <body>
     <h1>Unit tests</h1>
-    <test-component>
+    <button id="run-all">Run all tests</button>
+    <div id="test-results">
 
-    </test-component>
+    </div>
   </body>
 </html>
 

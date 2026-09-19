@@ -128,7 +128,30 @@ export class DataStore {
     return new DataStore(new DataStoreSignal(storeSignals), storeName);
   }
 
-  static createWithCustomLoadSignal(loadAction, storeName) {
+  static createWithCustomLoadSignal({loadAction, storeName,presentationSignals}) {
+    
+     if (presentationSignals) {
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
+          isArray = true;
+        }
+      });
+
+      if (isArray) {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ListUpdater(presentationSignals),
+        );
+      } else {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ItemUpdater(presentationSignals),
+        );
+      }
+    }
     return new DataStore(new CustomLoadSignal(loadAction), storeName);
   }
 

@@ -1,3 +1,5 @@
+import {assertEquals, assertResult, assertTrue} from '/lib/TestRunner.js'
+
 export class PerformanceTests {
 
   getName(){
@@ -5,7 +7,7 @@ export class PerformanceTests {
   }
 
   testStorePerformance_addLargeList() {    
-    assertMessage({time: 22});
+    assertResult({time: 22});
   }
 
   testFillerTest() {
@@ -19,6 +21,4 @@ export class PerformanceTests {
   testFillerTest_Three(){
     assertEquals(1,1);
   }
-
-
 }

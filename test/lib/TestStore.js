@@ -6,8 +6,13 @@ export class TestStore extends DataStore {
 
     const presentationSignals = {
       testResults:{
-        message: (testData)=>{
-          return `<p>${JSON.stringify(testData)}</p>`;
+        update: {
+          message: (testData)=>{
+            return testData.pass ? "success" : "fail"
+          },
+          name: (testData)=>{
+            return testData.id;
+          }
         }
       }
     }
@@ -16,7 +21,6 @@ export class TestStore extends DataStore {
       return testRunner.runTests();
     }
 
-    console.log(testRunner.getName());
     return new TestStore(
       new CustomLoadSignal(loadFunction), 
       testRunner.getName(),

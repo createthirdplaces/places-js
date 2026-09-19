@@ -1,1 +1,1732 @@
-class ApiLoadAction{constructor(t){this.getRequestConfig=t}async fetch(t,e,a){const s=this.getRequestConfig(t);s.headers||(s.headers={});const n=await ApiLoadAction.getResponseData(s);if(e&&a){if("GET"!==s?.method)for(let t=0;t<sessionStorage.length;t++){const e=sessionStorage.key(t);sessionStorage.setItem(e,JSON.stringify({}))}const t=JSON.parse(sessionStorage.getItem(e));t[a]=n,sessionStorage.setItem(e,JSON.stringify(t))}return n}static async#t(t,e){const a=t.headers.get("content-type");let s;return s=a&&a.includes("application/json")?await t.json():404===t.status?`Endpoint ${e} not found`:await t.text(),{status:t.status,errorMessage:s,endpoint:e}}static async getResponseData(t){let e=null;const a=window.localStorage.getItem("authToken");a&&(e=JSON.parse(a).access_token),e&&(t.headers?t.headers.authToken=e:t.headers={authToken:e});try{const e=await fetch(t.url.replace(/"/g,""),{method:t.method??"GET",headers:t.headers,body:t.body});if(200!==e.status)return await this.#t(e,t.url);if("application/json"===e.headers.get("content-type"))return await e.json();if("GET"!==t.method)for(let t=0;t<sessionStorage.length;t++){const e=sessionStorage.key(t);sessionStorage.setItem(e,JSON.stringify({}))}return{status:200}}catch(t){return{errorMessage:t.message}}}}class CustomLoadSignal{constructor(t){this.fetch=async e=>await t(e)}}class DataStoreSignal{constructor(t){this.fetch=async()=>{const e=[];t.forEach(t=>{const a=new Promise(e=>{t.store.fetchData().then(()=>{const a=t.store.getStoreData(),s={[t.fieldName]:a};e(s)})});e.push(a)});const a=await Promise.all(e),s={};for(let t=0;t<a.length;t++)Object.assign(s,a[t]);return s}}}class ItemUpdater{#e;#a;constructor(t){this.#e=t,this.#a=Object.keys(t.update)}updateStoreData(t,e,a){let s={};for(let e=0;e<this.#a.length;e++){const n=this.#a[e],i=this.#e.update[n](t);a&&i===a[n]||(s[n]=i)}if(Object.keys(t).length>0)for(let t=0;t<e.length;t++)e[t].updateSingleItem(s);return t}}class ListUpdater{#s=[];#n={};#e;#i=[];#o=[];#l=[];#r=!1;#d=!1;constructor(t){this.#e=t,Object.keys(this.#e).forEach(t=>{this.#e[t].update&&(this.#s.push(t),this.#n[t]=[])})}updateStoreData(t,e,a){let s=new Map;for(let n=0;n<this.#s.length;n++){const i=this.#s[n];if(!t[i])continue;if(this.#e[i]?.id)for(let e=0;e<t[i].length;e++)t[i][e].id=this.#e[i].id(t[i][e]);const o=t[i],l=[],r=new Set,d=new Set,h=this.#n[i];this.#o=new Set(h);const c=Math.max(o.length,h.length);let p=!0;for(let t=0;t<c;t++)t<o.length&&(l.push(o[t].id),r.add(o[t].id),this.#o.delete(o[t].id)),t<h.length&&d.add(h[t]),o[t]&&o[t].id===h[t]||(p=!1);if(this.#d=!1,!p){let t=new Set;t=0===d.size?r:p?new Set:r.difference(d),this.#h(t,e,i,l,o)}if(l&&0!==l.length||(this.#r=!0),this.#c(this.#o,e,t,a,i,l),this.#p(l,e,a,i),this.#d||this.#r)s[i]=t[i];else{const e=[],n=this.#e[i].update;for(let s=0;s<t[i].length;s++){let o=a[i][s],l=!1;for(let e=0;e<n.length;e++){const a=n[e];o[a]!==t[i][s][a]&&(l=!0)}l&&e.push(t[i][s])}s.set(i,e)}}if(0===s.size&&(s=new Map,Object.keys(t).forEach(e=>{Array.isArray(t[e])||s.set(e,t[e])})),s.size>0){this.#l=this.#m(s,a);for(let t=0;t<e.length;t++)e[t].updateVisible(this.#l)}return t}#h(t,e,a,s,n){if(t.size>0){let i=[],o=null;const l=this.#e[a].update,r=Object.keys(l);for(let e=0;e<s.length;e++){const a=s[e];for(let t=0;t<r.length;t++){const a=r[t],s=l[a];"function"==typeof s&&(n[e][a]=s(n[e]))}t.has(a)?(null===o&&(o=[]),o.push(n[e])):null!==o&&(i.push({insertBefore:n[e].id,insertData:o}),o=null)}null!==o&&(i.push({insertBefore:-1,insertData:o}),this.#d=!0),this.#n[a]=s;for(let t=0;t<e.length;t++)e[t].addItems(i)}}#c(t,e,a,s,n,i){if(t.size>0){let t=[];for(let e=0;e<s[n].length;e++){const a=s[n][e];this.#o.has(a.id)||t.push(a)}a[n]=t,this.#n[n]=i;for(let t=0;t<e.length;t++)e[t].removeItems(this.#o,this.#d,this.#r)}}#p(t,e,a,s){if(!this.#d&&t.length===this.#n[s].length){const n=[];for(let e=0;e<t.length;e++)if(t[e]!==this.#n[s][e]){let i=null;e<t.length-1&&(i=t[e+1]),this.#i.push({moveNodeId:t[e],moveBeforeId:i});for(let o=0;o<a[s].length;o++){const l=a[s][o];o+1===t[e]&&t[e]!==i-1&&n.push({updateIndex:e,updateData:l})}}for(let t=0;t<e.length;t++)e[t].swapUpdates(this.#i);for(let t=n.length-1;t>=0;t--){const e=n[t];a[s][e.updateIndex]=e.updateData}this.#n[s]=t}}#m(t,e){const a={},s=Object.keys(this.#e);for(let e=0;e<s.length;e++){const n=s[e],i=this.#e[n].presentationField||n,o=t[i];Array.isArray(o)?a[i]={}:a[i]=""}const n=Object.keys(this.#e);for(let s=0;s<n.length;s++){const i=n[s],{update:o,presentationField:l}=this.#e[i];if(t.get(i))if(Array.isArray(o)){let e=[];for(let a=0;a<t.get(i).length;a++){const s=t.get(i)[a],n=s.id,o=this.#e[i].update;if(Array.isArray(o))for(let t=0;t<o.length;t++)e.push({id:n,[o[t]]:s[`${o}`]});else Object.keys(o).forEach(t=>{e.push({id:n,[t]:o[t](s[`${o[t]}`])})})}a[i]=e}else{let s;s="function"==typeof o?o({prevState:e[i],newState:t.get(i)}):{param:t.get(i)};const n=e[l];if(Array.isArray(n)){for(let t=0;t<s.length;t++){const e=s[t].id,n=s[t].param;a[l][e]||(a[l][e]={}),a[l][e][l]=n}a[l]=s}else a[l]=s.param}}return a}}class DefaultUpdater{updateStoreData(t,e){for(let t=0;t<e.length;t++)e[t].updateFromSubscribedStores();return t}}class DataStore{static#g=0;static#u=new Map;#f={};#S=!1;#b;#I={};#e={};#n={};#N;#v=null;#C=[];#D;constructor(t,e,a=new DefaultUpdater){if(this.#C=[],this.#N=`store-${DataStore.#g}`,this.#D=a,sessionStorage.setItem(this.#N,JSON.stringify({})),e){if(DataStore.#u.has(e))throw new Error("Cannot create new store with duplicate name:"+e);DataStore.#u.set(e,this)}this.#b=t,DataStore.#g++,this.#I.removed=[],this.#I.moved=[],this.#I.updated=[]}static getStore(t){return this.#u.get(t)}static createWithApiLoadSignal({presentationSignals:t,queryConfig:e,storeName:a}){if(t){let s=!1;return Object.keys(t).forEach(t=>{"update"!==t&&(s=!0)}),s?new DataStore(new ApiLoadAction(e),a,new ListUpdater(t)):new DataStore(new DataStoreSignal(e),a,new ItemUpdater(t))}return new DataStore(new ApiLoadAction(e),a)}static createWithDataStoreSignals({presentationSignals:t,storeSignals:e,storeName:a}){if(!e)throw new Error("storeSignals is undefined");if(t){let s=!1;return Object.keys(t).forEach(t=>{"update"!==t&&(s=!0)}),new DataStore(new DataStoreSignal(e),a,s?new ListUpdater(t):new ItemUpdater(t))}return new DataStore(new DataStoreSignal(e),a)}static createWithCustomLoadSignal({loadAction:t,storeName:e,presentationSignals:a}){if(a){let t=!1;return Object.keys(a).forEach(e=>{"update"!==e&&(t=!0)}),new DataStore(new DataStoreSignal(storeSignals),e,t?new ListUpdater(a):new ItemUpdater(a))}return new DataStore(new CustomLoadSignal(t),e)}getStoreData(){return this.#v}getComponentUpdateData(){return Object.keys(this.#e).length>0?this.#I:this.#v}updateStoreData(t){this.#v=this.#D.updateStoreData(t,this.#C,this.#v||[])}hasLatestData(){return null!==this.#v&&void 0!==this.#v&&!this.#S}getSubscribedComponents(){return this.#C}async fetchData(t={},e){if(!this.#S){this.#S=!0;const a=this.#b.getRequestConfig?this.#b.getRequestConfig(t):{};let s=null,n=null;if(this.#N||this.#N.length>0){n=`${a.method??""}_${a.url}_${JSON.stringify(a.body)??""}`;const t=sessionStorage.getItem(n);if(t){const e=JSON.parse(t);0!==Object.keys(e).length&&n in e&&(s=e[n])}}if(null===s){if(e){const t=e.getSubscribedComponents();for(let a=0;a<t.length;a++)t[a].lockComponent(e)}s=await this.#b.fetch(t,this.#N,n)}if(this.updateStoreData(s),this.#S=!1,e){const t=e.getSubscribedComponents();for(let a=0;a<t.length;a++)t[a].unlockComponent(e);e.updateStoreData(s)}return s}}unsubscribeComponent(t){this.#C.splice(this.#C.indexOf(t),1)}subscribeComponent(t){let e=0;for(;e<this.#C.length;){if(this.#C[e]===t){this.#C=this.#C.splice(e,1);break}e++}this.#C.push(t)}}class TemplateItem{#T;#w;#k;#A;#y=new Map;#L={};#M;#E=null;#H;#O=new Map;static#R=new Map;static addTemplateFunction(t,e){TemplateItem.#R.set(t,e)}constructor(t){this.#$(t)}#F(){for(let t=0;t<this.#H.length;t++)this.#O.set(this.#H[t].fieldName,this.#H[t])}setupChangeEventHandlers(t){var e,a,s,n;t&&(this.#w=t,e=this.#E,a=this.#y,s=this.#T,n=this.#w,e.addEventListener("change",t=>{const e=t.target.getAttribute("data-change-id")||t.target.parentNode.getAttribute("data-change-id")||t.target.parentNode.parentNode.getAttribute("data-change-id");if(e){const i="data-click-id_"+e,o=(({eventItem:t,key:e})=>{const s=a.get(e);for(let e=0;e<s;e++)t=t.parentNode;return t.data_id})({eventItem:t.target,key:i}),l=s[e];n[l]({componentId:o})}}))}setupClickEventHandlers(t){var e,a,s,n;t&&(this.#A=t,e=this.#E,a=this.#y,s=this.#k,n=this.#A,e.addEventListener("click",t=>{const e=t.target.getAttribute("data-click-id")||t.target.parentNode.getAttribute("data-click-id")||t.target.parentNode.parentNode.getAttribute("data-click-id");if(e){const i="data-click-id_"+e,o=(({eventItem:t,key:e})=>{const s=a.get(e);for(let e=0;e<s;e++)t=t.parentNode;return t.data_id})({eventItem:t.target,key:i}),l=s[e];n[l]({componentId:o})}}))}getSignalByFieldName(t){return this.#O.get(t)}getAllSignals(){return this.#O.values()}#U(t){const e=t.split("\n");for(;;){let t,a,s,n=0;for(let i=0;i<e.length;i++)if(e[i].includes("{#if")&&(n++,t||(t=i)),e[i].includes("{else}")&&1===n&&(a=i),e[i].includes("{/if}")&&(n--,0===n)){s=i;break}if(!t)break;{const n=e[t].trim().split(" ")[1].split("}")[0],i=TemplateItem.#R.get(n);if(!i)throw new Error(`No template function defined for ${n}`);i()?(e.splice(s,1),a&&e.splice(a,s-a),e.splice(t,1)):(e.splice(s,1),e.splice(t,a-t+1)),t=null,a=null,s=null}}return e.join("\n")}#$(t){t=this.#U(t),this.#T=[],this.#k=[];const e=Date.now();this.#H=[];let a,s,n=[];for(let e=0;e<t.length;e++){const i=t.charAt(e);if(a){if(s&&">"===i){const i=t.substring(a,e+1),o=i.split("}");let l;const r=[];for(let t=0;t<o.length;t++){const e=o[t],a=e.lastIndexOf("="),s=e.lastIndexOf(" ",a);0===t&&(l=e.substring(0,s+1)),t<o.length-1&&r.push({attr:e.substring(s+1,a),fieldName:e.substring(a+3)})}let d=o[o.length-1];r.length>0?d.startsWith('">')&&(d=d.substring(0,d.length-2)+">"):(l=i.substring(0,i.length-1),d=">"),n.push({endSection:d,isHtml:!0,startSection:l,templateAttrs:r}),a=null,s=!1}else if("<"===i){let s=t.substring(a,e).replaceAll("\t","").replaceAll("\n","").trim();s.trim().length>0&&n.push({isHtml:!1,token:s}),a=null,e--}}else a=e,s="<"===i}for(let t=0;t<n.length;t++){const e=n[t];if(e.isHtml)for(let a=0;a<e.templateAttrs.length;a++){let s=e.templateAttrs[a].attr;if(s.startsWith("on"))"onchange"!==s&&"onChange"!==s||(e.templateAttrs[a].signalRef=`data-change-id=${this.#T.length}`,this.#T.push(e.templateAttrs[a].fieldName)),"onclick"!==s&&"onClick"!==s||(e.templateAttrs[a].signalRef=`data-click-id=${this.#k.length}`,this.#k.push(e.templateAttrs[a].fieldName));else{const n=this.#H.length,i=t>0?`data-signal-id-${n}`:"";"innerhtml"===s&&(s="innerHTML");const o={attr:s,fieldName:e.templateAttrs[a].fieldName,signalId:t>0?n:-1,signalPath:i};e.templateAttrs[a].signalRef=i,this.#H.push(o)}}else if(n[t].token.includes("{")){const e=n[t].token.indexOf("{"),a=n[t].token.indexOf("}"),s=n[t].token.substring(e+1,a),i=this.#H.length,o=t>0?`data-signal-id-${i}`:"",l={attr:"textcontent",fieldName:s,signalId:i,signalPath:o};n[t-1].templateAttrs.push({attr:"textcontent",fieldName:s,signalRef:o}),this.#H.push(l)}else n[t].textcontent=n[t].token}let i=[];for(let t=0;t<n.length;t++){const e=n[t];if(e.isHtml)if(e.templateAttrs.length>0){i.push(e.startSection);for(let t=0;t<e.templateAttrs.length;t++)i.push(" "+e.templateAttrs[t].signalRef+" ");i.push(e.endSection)}else i.push(e.startSection+e.endSection);else e.textcontent&&i.push(e.textcontent)}let o=document.createElement("template");o.innerHTML=i.join(""),this.#M=o.content.firstChild;["data-click-id","data-change-id"].forEach(t=>{const e=`[${t}]`;this.#M.querySelectorAll(e).forEach(e=>{const a=e.attributes[t].value;let s=0;for(;"#document-fragment"!==e.parentNode.nodeName;)null!==e.parentNode&&(e=e.parentNode,s++);const n=`${t}_${a}`;this.#y.set(n,s)})});for(let t=0;t<this.#H.length;t++){const e=this.#H[t];if(e.signalId>=0){const t=`[${e.signalPath}]`;let a=[],s=o.content.querySelector(t),n=s;for(;"#document-fragment"!==n.parentNode.nodeName;){for(let t=0;t<n.parentNode.childNodes.length;t++)Object.is(n.parentNode.childNodes[t],n)&&a.push(`:nth-child(${t+1})`);n=n.parentNode}a=a.reverse(),s.attributes.removeNamedItem(e.signalPath),e.signalPath=a.join(">")}}this.#F();const l=Date.now()-e;l>0&&console.warn(`Slow template parse time of ${l} miliseconds`)}isAttributeChar(t){const e=t.charCodeAt(0);return e>64&&e<91||e>96&&e<123}setDataField(t){this.dataField=t}getDataField(){return this.dataField}setId(t){this.id=t}setTemplateName(t){this.templateName=t.toUpperCase()}setTemplateRoot(t){this.#E=t}setSingleNode(t){this.#M=document.querySelector("[data-template]"),this.#M.replaceChildren(t)}appendNode(t){this.#E.appendChild(t)}appendChild(t){this.#E.appendChild(t)}getTemplateNode(){return this.#M}addNode(t,e){this.#L[t]=e}getNode(t){return this.#L[t]}getFirstNode(){return this.#L[0]}removeChild(t){this.#E.removeChild(this.#L[t])}clearNodes(){this.#E.replaceChildren([]),setTimeout(()=>{Object.keys(this.#L).forEach(t=>{this.#L[t]=null}),this.#L={}},0)}setTemplateHtml(t){this.#E.innerHTML=t}getTemplateHtml(){return this.#M.innerHTML}}TemplateItem.addTemplateFunction("isMobile",()=>window.matchMedia("(max-width: 32em)").matches);class PresentationComponent extends HTMLElement{#T={};#k={};#x="<p>Use light DOM or render() method to show HTML</p>";#j;#q;#P=new Map;#_;#B;static#J=0;static clickHandlerCount=0;static changeHandlerCount=0;constructor(t){super(),this.#_=t}startLoadingIndicator(){this.#x=this.innerHTML,this.innerHTML=this.#q.generateLoadingIndicatorHtml(),this.#j=Date.now()}connectedCallback(){const t=this.dataset.store;if(t){const e=this.dataset.loadingIndicator;if(e){const t=this.dataset.loadingImage,a=`\n            <${e}\n\t\t\t\t\t\t  ${t?`image-path=${t}`:""}\t\n            >\n\t\t\t\t\t  </${e}>`;this.#q={generateLoadingIndicatorHtml:()=>a,minTimeMs:500},this.startLoadingIndicator()}const a=DataStore.getStore(t);this.#_=DataStore.getStore(t),a.subscribeComponent(this)}this.querySelector("[data-template]")&&this.#z()}init(t){this.updateData(t)}setClickEvents(t){this.#k=t}setChangeEvents(t){this.#T=t}#W(t){const{fieldName:e,attr:a,signalId:s,signalPath:n}=t.signalConfig,{signalData:i,elementRoot:o}=t.updateData;if(void 0===i[e])return;let l=o;if(n){const t=`${o.data_id}-${s}`;this.#P.has(t)?l=this.#P.get(t):(l=l.querySelector(n),this.#P.set(t,l))}"textcontent"===a&&(l.innerText=i[e]),"innerHTML"===a?l.innerHTML=i[e]:l.setAttribute(a,`${i[e]}`)}disconnectedCallback(){this.#_.unsubscribeComponent(this)}async#G(){if(!this.#q)return;const t=Date.now()-this.#j,e=new Promise(e=>{setTimeout(()=>{e()},t)});await Promise.resolve(e),this.innerHTML=this.#x,this.#j=null}#z(){let t=this.querySelector("[data-template]");if(!t)return;t.style.visibility="initial";let e=t.innerHTML;t.innerHTML="",this.#B=new TemplateItem(e),t.innerHTML="",this.#B.setTemplateRoot(t),this.#B.setDataField(t?.getAttributeNode("data-template").value),this.#B.setId(`template-${PresentationComponent.#J}`),this.#B.setTemplateName(this.nodeName),this.#B.setupClickEventHandlers(this.#k),this.#B.setupChangeEventHandlers(this.#T)}updateSingleItem(t){this.#B||this.#z();const e=this.#B.getFirstNode(),a=this.#B.getTemplateNode();if(e){const e=this.#B.getAllSignals();for(;;){const a=e.next().value;if(!a)break;t[a.fieldName]&&this.#W({signalConfig:a,updateData:{signalData:t,elementRoot:this.#B.getNode(0)}})}}else{const e=a.cloneNode(!0),s=this.#B.getAllSignals();for(;;){const a=s.next().value;if(!a)break;void 0===t[a.fieldName]&&console.error(`No state defined for template field ${a.fieldName}`),this.#W({signalConfig:a,updateData:{signalData:t,elementRoot:e}})}this.#B.addNode(0,e),this.#B.setSingleNode(e)}}async addItems(t){this.#j&&await this.#G(),this.#B||this.#z();const e=this.#B.getTemplateNode();for(let a=0;a<t.length;a++){const{insertBefore:s,insertData:n}=t[a];let i=document.createDocumentFragment();for(let t=0;t<n.length;t++){const a=e.cloneNode(!0),s=this.#B.getAllSignals();for(a.data_id=n[t].id,this.#B.addNode(n[t].id,a);;){const e=s.next().value;if(!e)break;this.#W({signalConfig:e,updateData:{signalData:n[t],elementRoot:a}})}i.appendChild(a)}if(-1!==s){const t=this.#B.getNode(s);t.parentNode.insertBefore(i,t)}else this.#B.appendChild(i)}}removeItems(t,e,a){null!==this.#j&&this.#G(),a&&!e?this.#B.clearNodes():t.forEach(t=>{this.#B.removeChild(t)}),setTimeout(()=>{if(a)this.#P.clear();else for(const[e]of this.#P){const a=e.split("-")[0];t.has(parseInt(a))&&this.#P.delete(e)}},0)}swapUpdates(t){for(let e=0;e<t.length;e++){const{moveNodeId:a,moveBeforeId:s}=t[e],n=this.#B.getNode(a);if(null!==s){const t=this.#B.getNode(s);t.parentNode.insertBefore(n,t)}else n.parentNode.appendChild(n)}}async updateVisible(t){if(!this.#B)return void this.#G();null!==this.#j&&this.#G();const e=t[this.#B.dataField]||[];for(let t=0;t<e.length;t++){let a,s,n;if(Object.keys(e[t]).forEach(i=>{"id"===i?n=e[t][i]:(a=i,s=e[t][i])}),n){const t={signalConfig:this.#B.getSignalByFieldName(a),updateData:{signalData:{[a]:s},elementRoot:this.#B.getNode(n)}};this.#W(t)}}}}class ShadowDOMComponent extends HTMLElement{connectedCallback(){this.attachShadow({mode:"open"}),this.shadowRoot;const t=document.createElement("template");t.innerHTML=this.getTemplateStyle()+"<div></div>",this.shadowRoot.appendChild(t.content.cloneNode(!0)),this.shadowRoot.querySelector("div").innerHTML=this.render()}}class StaticComponent extends HTMLElement{static#V=new RegExp('onclick="{',"i");#K={};constructor(){super();const t=this.innerHTML.split(StaticComponent.#V);for(let e=1;e<t.length;e++){const a=t[e].split("}"),s=a[0];t[e]=`data-${this.nodeName}-click="${s}"${a[1]}`}this.innerHTML=t.join("")}setClickEvents(t){const e=`data-${this.nodeName.toLowerCase()}-click`;this.querySelectorAll(`[${e}]`).forEach(a=>{const s=a.attributes[e].value;a.id=s,a.removeAttribute(e),this.#K[a.id]=t[s]}),this.addEventListener("click",t=>{const e=t.target?.id;this.#K[e]&&this.#K[e](t)})}}export{ApiLoadAction,CustomLoadSignal,DataStore,DataStoreSignal,ItemUpdater,ListUpdater,PresentationComponent,ShadowDOMComponent,StaticComponent,TemplateItem};
+/*
+ * Don't iniitalize directly. use DataStore.createApiLoadSignal instead
+ **/
+class ApiLoadAction {
+  constructor(getRequestConfig) {
+    this.getRequestConfig = getRequestConfig;
+  }
+
+  /**
+   * @param params API request parameters
+   * @param cacheKey
+   * @param requestKey
+   */
+  async fetch(params, cacheKey, requestKey) {
+    const queryConfig = this.getRequestConfig(params);
+
+    if (!queryConfig.headers) {
+      queryConfig.headers = {};
+    }
+
+    const response = await ApiLoadAction.getResponseData(queryConfig);
+
+    if (cacheKey && requestKey) {
+      if (queryConfig?.method !== "GET") {
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}));
+        }
+      }
+
+      const data = JSON.parse(sessionStorage.getItem(cacheKey));
+      data[requestKey] = response;
+      sessionStorage.setItem(cacheKey, JSON.stringify(data));
+    }
+    return response;
+  }
+
+  static async #getErrorData(response, url) {
+    const contentType = response.headers.get("content-type");
+    let message;
+    if (contentType && contentType.includes("application/json")) {
+      message = await response.json();
+    } else {
+      if (response.status === 404) {
+        message = `Endpoint ${url} not found`;
+      } else {
+        message = await response.text();
+      }
+    }
+
+    return {
+      status: response.status,
+      errorMessage: message,
+      endpoint: url,
+    };
+  }
+
+  /**
+   * Directly make an API request and return the data. Use this method if the API request needs
+   * to be run as part of an event handler and no other components subscribe to the request.
+   * Cache data will not be used or updated.
+   *
+   * @param {ApiRequestConfig} queryConfig Configuration of the API request.
+   */
+  static async getResponseData(queryConfig) {
+    let authData = null;
+
+    const data = window.localStorage.getItem("authToken");
+    if (data) {
+      authData = JSON.parse(data).access_token;
+    }
+
+    if (authData) {
+      if (queryConfig.headers) {
+        queryConfig.headers["authToken"] = authData;
+      } else {
+        queryConfig.headers = {
+          authToken: authData,
+        };
+      }
+    }
+
+    try {
+      //The replace call is a workaround for an issue with url strings containing double quotes.
+      const response = await fetch(queryConfig.url.replace(/"/g, ""), {
+        method: queryConfig.method ?? "GET",
+        headers: queryConfig.headers,
+        body: queryConfig.body,
+      });
+
+      if (response.status !== 200) {
+        return await this.#getErrorData(response, queryConfig.url);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType === "application/json") {
+        return await response.json();
+      }
+
+      //Cjlear cache because there was a likely data update.
+      if (queryConfig.method !== "GET") {
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          sessionStorage.setItem(key, JSON.stringify({}));
+        }
+      }
+      return { status: 200 };
+    } catch (e) {
+      return { errorMessage: e.message };
+    }
+  }
+}
+
+/**
+ * Class to define a custom data store load action with direct control over any async calls that are made.
+ * It is intended for use when additional processing needs to be done after an async call, or if a store needs
+ * to combine data from multiple sources.
+ */
+class CustomLoadSignal {
+  constructor(loadFunction) {
+    this.fetch = async (params) => {
+      return await loadFunction(params);
+    };
+  }
+}
+
+/**
+ * Class to determine a custom load action that includes a dependenccy on other stores
+ **/
+class DataStoreSignal {
+  constructor(stores) {
+    //TODO: Make the store also subscribe to updates
+    //from the dependent stores.
+    this.fetch = async () => {
+      const promises = [];
+      stores.forEach((storeConfig) => {
+        const storeFetch = new Promise((resolve) => {
+          storeConfig.store.fetchData().then(() => {
+            const data = storeConfig.store.getStoreData();
+            const resolveState = {
+              [storeConfig.fieldName]: data,
+            };
+            resolve(resolveState);
+          });
+        });
+
+        promises.push(storeFetch);
+      });
+
+      const data = await Promise.all(promises);
+      const result = {};
+
+      for (let i = 0; i < data.length; i++) {
+        Object.assign(result, data[i]);
+      }
+
+      return result;
+    };
+  }
+}
+
+class ItemUpdater {
+  #presentationSignals;
+  #topLevelUpdateFields;
+
+  constructor(presentationSignals) {
+    this.#presentationSignals = presentationSignals;
+    this.#topLevelUpdateFields = Object.keys(presentationSignals.update);
+  }
+
+  updateStoreData(storeUpdates, subscribers, prevStoreData) {
+    let renderUpdates = {};
+
+    for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {
+      const fieldName = this.#topLevelUpdateFields[i];
+      const updateData =
+        this.#presentationSignals.update[fieldName](storeUpdates);
+
+      if (!prevStoreData || updateData !== prevStoreData[fieldName]) {
+        renderUpdates[fieldName] = updateData;
+      }
+    }
+
+    if (Object.keys(storeUpdates).length > 0) {
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].updateSingleItem(renderUpdates);
+      }
+    }
+    return storeUpdates;
+  }
+}
+
+class ListUpdater {
+  #listFields = [];
+
+  #prevOrdering = {};
+  #presentationSignals;
+
+  #moved = [];
+  #removed = [];
+  #updated = [];
+  #isClear = false;
+  #isReplace = false;
+
+  constructor(presentationSignals) {
+    this.#presentationSignals = presentationSignals;
+    Object.keys(this.#presentationSignals).forEach((field) => {
+      if (this.#presentationSignals[field]["update"]) {
+        this.#listFields.push(field);
+        this.#prevOrdering[field] = [];
+      }
+    });
+  }
+
+  updateStoreData(storeUpdates, subscribers, prevStoreData) {
+    let changeData = new Map();
+
+    for (let i = 0; i < this.#listFields.length; i++) {
+      const field = this.#listFields[i];
+      if (!storeUpdates[field]) {
+        continue;
+      }
+      //Assign id value to items.
+      if (this.#presentationSignals[field]?.id) {
+        for (let j = 0; j < storeUpdates[field].length; j++) {
+          storeUpdates[field][j].id = this.#presentationSignals[field].id(
+            storeUpdates[field][j],
+          );
+        }
+      }
+
+      const dataItem = storeUpdates[field];
+      const updatedOrdering = [];
+
+      const newIds = new Set();
+      const prevIds = new Set();
+
+      const prevOrdering = this.#prevOrdering[field];
+
+      this.#removed = new Set(prevOrdering);
+      const maxNum = Math.max(dataItem.length, prevOrdering.length);
+
+      let sameLocs = true;
+
+      for (let num = 0; num < maxNum; num++) {
+        if (num < dataItem.length) {
+          updatedOrdering.push(dataItem[num].id);
+          newIds.add(dataItem[num].id);
+          this.#removed.delete(dataItem[num].id);
+        }
+        if (num < prevOrdering.length) {
+          prevIds.add(prevOrdering[num]);
+        }
+        if (!dataItem[num] || dataItem[num].id !== prevOrdering[num]) {
+          sameLocs = false;
+        }
+      }
+
+      this.#isReplace = false;
+
+      if (!sameLocs) {
+        let added = new Set();
+        if (prevIds.size === 0) {
+          added = newIds;
+        } else {
+          added = sameLocs ? new Set() : newIds.difference(prevIds);
+        }
+        this.#addToSubscribers(
+          added,
+          subscribers,
+          field,
+          updatedOrdering,
+          dataItem,
+        );
+      }
+
+      if (!updatedOrdering || updatedOrdering.length === 0) {
+        this.#isClear = true;
+      }
+
+      this.#removeFromSubscribers(
+        this.#removed,
+        subscribers,
+        storeUpdates,
+        prevStoreData,
+        field,
+        updatedOrdering,
+      );
+      this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
+
+      if (!this.#isReplace && !this.#isClear) {
+        const arrayChanges = [];
+        const reactiveFields = this.#presentationSignals[field]["update"];
+
+        for (let i = 0; i < storeUpdates[field].length; i++) {
+          let oldStateRow = prevStoreData[field][i];
+
+          let hasChanged = false;
+          for (let j = 0; j < reactiveFields.length; j++) {
+            const reactiveName = reactiveFields[j];
+
+            const oldState = oldStateRow[reactiveName];
+            const newState = storeUpdates[field][i][reactiveName];
+            if (oldState !== newState) {
+              hasChanged = true;
+            }
+          }
+
+          if (hasChanged) {
+            arrayChanges.push(storeUpdates[field][i]);
+          }
+        }
+        changeData.set(field, arrayChanges);
+      } else {
+        changeData[field] = storeUpdates[field];
+      }
+    }
+
+    //Look at storeUpdates if changeData is empty
+    if (changeData.size === 0) {
+      changeData = new Map();
+      Object.keys(storeUpdates).forEach((key) => {
+        if (!Array.isArray(storeUpdates[key])) {
+          changeData.set(key, storeUpdates[key]);
+        }
+      });
+    }
+    if (changeData.size > 0) {
+      this.#updated = this.#generatePresentationUpdates(
+        changeData,
+        prevStoreData,
+      );
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].updateVisible(this.#updated);
+      }
+    }
+
+    return storeUpdates;
+  }
+
+  #addToSubscribers(added, subscribers, field, updatedOrdering, dataItem) {
+    if (added.size > 0) {
+      let addFragments = [];
+      let addFragment = null;
+
+      const addSignals = this.#presentationSignals[field].update;
+      const addSignalKeys = Object.keys(addSignals);
+      for (let num = 0; num < updatedOrdering.length; num++) {
+        const id = updatedOrdering[num];
+
+        for (let key = 0; key < addSignalKeys.length; key++) {
+          const signalField = addSignalKeys[key];
+          const signal = addSignals[signalField];
+          if (typeof signal === "function") {
+            dataItem[num][signalField] = signal(dataItem[num]);
+          }
+        }
+        if (added.has(id)) {
+          if (addFragment === null) {
+            addFragment = [];
+          }
+          addFragment.push(dataItem[num]);
+        } else {
+          if (addFragment !== null) {
+            addFragments.push({
+              insertBefore: dataItem[num].id,
+              insertData: addFragment,
+            });
+            addFragment = null;
+          }
+        }
+      }
+      if (addFragment !== null) {
+        addFragments.push({
+          insertBefore: -1,
+          insertData: addFragment,
+        });
+        this.#isReplace = true;
+      }
+      this.#prevOrdering[field] = updatedOrdering;
+
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].addItems(addFragments);
+      }
+    }
+  }
+
+  #removeFromSubscribers(
+    removed,
+    subscribers,
+    storeUpdates,
+    prevStoreData,
+    field,
+    updatedOrdering,
+  ) {
+    if (removed.size > 0) {
+      let updatedPrev = [];
+
+      for (let a = 0; a < prevStoreData[field].length; a++) {
+        const item = prevStoreData[field][a];
+        if (!this.#removed.has(item.id)) {
+          updatedPrev.push(item);
+        }
+      }
+
+      storeUpdates[field] = updatedPrev;
+      this.#prevOrdering[field] = updatedOrdering;
+      for (let i = 0; i < subscribers.length; i++) {
+        subscribers[i].removeItems(
+          this.#removed,
+          this.#isReplace,
+          this.#isClear,
+        );
+      }
+    }
+  }
+
+  #moveItems(updatedOrdering, subscribers, prevStoreData, field) {
+    if (
+      !this.#isReplace &&
+      updatedOrdering.length === this.#prevOrdering[field].length
+    ) {
+
+      const swapUpdates = [];
+      for (let num = 0; num < updatedOrdering.length; num++) {
+        if (updatedOrdering[num] !== this.#prevOrdering[field][num]) {
+          let insertBefore = null;
+          if (num < updatedOrdering.length - 1) {
+            insertBefore = updatedOrdering[num + 1];
+          }
+
+          this.#moved.push({
+            moveNodeId: updatedOrdering[num],
+            moveBeforeId: insertBefore,
+          });
+
+          for (let a = 0; a < prevStoreData[field].length; a++) {
+            const item = prevStoreData[field][a];
+
+            if (a + 1 === updatedOrdering[num]) {
+              if (!(updatedOrdering[num] === insertBefore - 1)) {
+                swapUpdates.push({
+                  updateIndex: num,
+                  updateData: item,
+                });
+              }
+            }
+          }
+        }
+      }
+
+      for (let a = 0; a < subscribers.length; a++) {
+        subscribers[a].swapUpdates(this.#moved);
+      }
+      for (let a = swapUpdates.length - 1; a >= 0; a--) {
+        const swapItem = swapUpdates[a];
+        prevStoreData[field][swapItem.updateIndex] = swapItem.updateData;
+      }
+      this.#prevOrdering[field] = updatedOrdering;
+    }
+  }
+
+  #generatePresentationUpdates(updates, prevStoreData) {
+    const presentationUpdates = {};
+
+    const keys = Object.keys(this.#presentationSignals);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+
+      const presentationField =
+        this.#presentationSignals[key]["presentationField"] || key;
+
+      const dataToUpdate = updates[presentationField];
+
+      if (Array.isArray(dataToUpdate)) {
+        presentationUpdates[presentationField] = {};
+      } else {
+        presentationUpdates[presentationField] = "";
+      }
+    }
+
+    const signalKeys = Object.keys(this.#presentationSignals);
+    for (let i = 0; i < signalKeys.length; i++) {
+      const stateField = signalKeys[i];
+      const { update, presentationField } =
+        this.#presentationSignals[stateField];
+
+      if (!updates.get(stateField)) {
+        continue;
+      }
+      if (!Array.isArray(update)) {
+        let changeData;
+
+        if (typeof update === "function") {
+          //TODO: Add check if state field is array.
+          changeData = update({
+            prevState: prevStoreData[stateField],
+            newState: updates.get(stateField),
+          });
+        } else {
+          changeData = { param: updates.get(stateField) };
+        }
+
+        const dataToUpdate = prevStoreData[presentationField];
+
+        if (Array.isArray(dataToUpdate)) {
+          for (let j = 0; j < changeData.length; j++) {
+            const id = changeData[j].id;
+            const updateVal = changeData[j].param;
+            if (!presentationUpdates[presentationField][id]) {
+              presentationUpdates[presentationField][id] = {};
+            }
+            presentationUpdates[presentationField][id][presentationField] =
+              updateVal;
+          }
+          presentationUpdates[presentationField] = changeData;
+        } else {
+          presentationUpdates[presentationField] = changeData["param"];
+        }
+      } else {
+        let changeData = [];
+        for (let i = 0; i < updates.get(stateField).length; i++) {
+          const updateData = updates.get(stateField)[i];
+          const id = updateData.id;
+          const reactiveFields =
+            this.#presentationSignals[stateField]["update"];
+
+          if (Array.isArray(reactiveFields)) {
+            for (let j = 0; j < reactiveFields.length; j++) {
+              changeData.push({
+                id: id,
+                [reactiveFields[j]]: updateData[`${reactiveFields}`],
+              });
+            }
+          } else {
+            Object.keys(reactiveFields).forEach((fieldName) => {
+              changeData.push({
+                id: id,
+                [fieldName]: reactiveFields[fieldName](
+                  updateData[`${reactiveFields[fieldName]}`],
+                ),
+              });
+            });
+          }
+        }
+        presentationUpdates[stateField] = changeData;
+      }
+    }
+    return presentationUpdates;
+  }
+}
+
+class DefaultUpdater {
+  /**
+   * Update data in the store and trigger a render of components subscribed to the store.
+   * @param storeUpdates Updated store data. Fields not specified in storeData will not be updated.
+   */
+  updateStoreData(storeUpdates, subscribers) {
+    for (let i = 0; i < subscribers.length; i++) {
+      subscribers[i].updateFromSubscribedStores();
+    }
+    return storeUpdates;
+  }
+}
+
+class DataStore {
+  static #storeCount = 0;
+  static #storeNameMap = new Map();
+
+  #fieldTypeMapping = {};
+  #isLoading = false;
+  #loadAction;
+
+  #presentationUpdates = {};
+  #presentationSignals = {};
+  #prevOrdering = {};
+  #requestStoreId;
+  #storeData = null;
+  #subscribers = [];
+
+  #updater;
+
+  constructor(loadAction, storeName, updater = new DefaultUpdater()) {
+    this.#subscribers = [];
+    this.#requestStoreId = `store-${DataStore.#storeCount}`;
+
+    this.#updater = updater;
+
+    sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
+
+    if (storeName) {
+      if (DataStore.#storeNameMap.has(storeName)) {
+        throw new Error(
+          "Cannot create new store with duplicate name:" + storeName,
+        );
+      }
+      DataStore.#storeNameMap.set(storeName, this);
+    }
+
+    this.#loadAction = loadAction;
+
+    DataStore.#storeCount++;
+
+    this.#presentationUpdates["removed"] = [];
+    this.#presentationUpdates["moved"] = [];
+    this.#presentationUpdates["updated"] = [];
+  }
+
+  static getStore(storeName) {
+    return this.#storeNameMap.get(storeName);
+  }
+
+  static createWithApiLoadSignal({
+    presentationSignals,
+    queryConfig,
+    storeName,
+  }) {
+    if (presentationSignals) {
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
+          isArray = true;
+        }
+      });
+
+      if (isArray) {
+        return new DataStore(
+          new ApiLoadAction(queryConfig),
+          storeName,
+          new ListUpdater(presentationSignals),
+        );
+      } else {
+        return new DataStore(
+          new DataStoreSignal(queryConfig),
+          storeName,
+          new ItemUpdater(presentationSignals),
+        );
+      }
+    }
+    return new DataStore(new ApiLoadAction(queryConfig), storeName);
+  }
+
+  static createWithDataStoreSignals({
+    presentationSignals,
+    storeSignals,
+    storeName,
+  }) {
+    if (!storeSignals) {
+      throw new Error("storeSignals is undefined");
+    }
+
+    if (presentationSignals) {
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
+          isArray = true;
+        }
+      });
+
+      if (isArray) {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ListUpdater(presentationSignals),
+        );
+      } else {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ItemUpdater(presentationSignals),
+        );
+      }
+    }
+    return new DataStore(new DataStoreSignal(storeSignals), storeName);
+  }
+
+  static createWithCustomLoadSignal({loadAction, storeName,presentationSignals}) {
+    
+     if (presentationSignals) {
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
+          isArray = true;
+        }
+      });
+
+      if (isArray) {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ListUpdater(presentationSignals),
+        );
+      } else {
+        return new DataStore(
+          new DataStoreSignal(storeSignals),
+          storeName,
+          new ItemUpdater(presentationSignals),
+        );
+      }
+    }
+    return new DataStore(new CustomLoadSignal(loadAction), storeName);
+  }
+
+  /** * Returns store data.
+   * @returns A JSON object representing store data.
+   */
+  getStoreData() {
+    return this.#storeData;
+  }
+
+  getComponentUpdateData() {
+    if (Object.keys(this.#presentationSignals).length > 0) {
+      return this.#presentationUpdates;
+    }
+
+    return this.#storeData;
+  }
+
+  updateStoreData(storeUpdates) {
+    this.#storeData = this.#updater.updateStoreData(
+      storeUpdates,
+      this.#subscribers,
+      this.#storeData || [],
+    );
+  }
+
+  /**
+   * @returns {boolean} false if the data in the store is null or undefined and is not in a loading state true otherwise.
+   */
+  hasLatestData() {
+    return (
+      this.#storeData !== null &&
+      this.#storeData !== undefined &&
+      !this.#isLoading
+    );
+  }
+
+  getSubscribedComponents() {
+    return this.#subscribers;
+  }
+
+  /**
+   * Retrieves data from an external source.
+   * @param params Parameters for the request.
+   * @param dataStore Optional data store that will be subscribed to updates from this store.
+   */
+  async fetchData(params = {}, dataStore) {
+    // Do not make a data request if there is an active one in progress. The active one will push data to subscribed components.
+    if (!this.#isLoading) {
+      this.#isLoading = true;
+      const requestConfig = this.#loadAction.getRequestConfig
+        ? this.#loadAction.getRequestConfig(params)
+        : {};
+
+      let response = null;
+      let requestKey = null;
+
+      // Retrieve cached response if one exists.
+      if (this.#requestStoreId || this.#requestStoreId.length > 0) {
+        requestKey = `${requestConfig.method ?? ""}_${requestConfig.url}_${JSON.stringify(requestConfig.body) ?? ""}`;
+
+        const dataStr = sessionStorage.getItem(requestKey);
+        if (dataStr) {
+          const data = JSON.parse(dataStr);
+
+          if (!(Object.keys(data).length === 0) && requestKey in data) {
+            response = data[requestKey];
+          }
+        }
+      }
+
+      // Make an API call if a cached response does not exist.
+      if (response === null) {
+        //Replace component with loading indicator if one exists.
+
+        if (dataStore) {
+          const dataStoreSubscribedComponents =
+            dataStore.getSubscribedComponents();
+          for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
+            dataStoreSubscribedComponents[i].lockComponent(dataStore);
+          }
+        }
+        response = await this.#loadAction.fetch(
+          params,
+          this.#requestStoreId,
+          requestKey,
+        );
+      }
+
+      this.updateStoreData(response);
+
+      this.#isLoading = false;
+
+      if (dataStore) {
+        const dataStoreSubscribedComponents =
+          dataStore.getSubscribedComponents();
+        for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
+          dataStoreSubscribedComponents[i].unlockComponent(dataStore);
+        }
+        dataStore.updateStoreData(response);
+      }
+      return response;
+    }
+  }
+
+  unsubscribeComponent(subscriber) {
+    this.#subscribers.splice(this.#subscribers.indexOf(subscriber), 1);
+  }
+
+  subscribeComponent(subscriber) {
+    let i = 0;
+    while (i < this.#subscribers.length) {
+      if (this.#subscribers[i] === subscriber) {
+        this.#subscribers = this.#subscribers.splice(i, 1);
+        break;
+      }
+      i++;
+    }
+    this.#subscribers.push(subscriber);
+  }
+}
+
+class TemplateItem {
+  #changeTemplateEvents;
+  #changeTemplateHandlers;
+
+  #clickTemplateEvents;
+  #clickTemplateHandlers;
+
+  #handlerDepthMap = new Map();
+  #nodes = {};
+
+  #templateNode;
+  #templateRoot = null;
+  #templateSignals;
+  #signalMap = new Map();
+
+  static #templateFunctions = new Map();
+
+  static addTemplateFunction(name, templateFunction) {
+    TemplateItem.#templateFunctions.set(name, templateFunction);
+  }
+
+  constructor(html) {
+    this.#defineComponent(html);
+  }
+
+  #initSignalMap() {
+    for (let i = 0; i < this.#templateSignals.length; i++) {
+      this.#signalMap.set(
+        this.#templateSignals[i].fieldName,
+        this.#templateSignals[i],
+      );
+    }
+  }
+
+  setupChangeEventHandlers(events) {
+    if (events) {
+      this.#changeTemplateHandlers = events;
+
+      (function (
+        templateRoot,
+        handlerDepthMap,
+        changeTemplateEvents,
+        changeTemplateHandlers,
+      ) {
+        const getItemIdForEvent = ({ eventItem, key }) => {
+          const depth = handlerDepthMap.get(key);
+          for (let i = 0; i < depth; i++) {
+            eventItem = eventItem.parentNode;
+          }
+          return eventItem.data_id;
+        };
+
+        templateRoot.addEventListener("change", (e) => {
+          const changeId =
+            e.target.getAttribute("data-change-id") ||
+            e.target.parentNode.getAttribute("data-change-id") ||
+            e.target.parentNode.parentNode.getAttribute("data-change-id");
+          if (changeId) {
+            const key = "data-click-id_" + changeId;
+            const componentId = getItemIdForEvent({
+              eventItem: e.target,
+              key: key,
+            });
+
+            const handlerName = changeTemplateEvents[changeId];
+            changeTemplateHandlers[handlerName]({
+              componentId: componentId,
+            });
+          }
+        });
+      })(
+        this.#templateRoot,
+        this.#handlerDepthMap,
+        this.#changeTemplateEvents,
+        this.#changeTemplateHandlers,
+      );
+    }
+  }
+
+  setupClickEventHandlers(events) {
+    if (events) {
+      this.#clickTemplateHandlers = events;
+
+      (function (
+        templateRoot,
+        handlerDepthMap,
+        clickTemplateEvents,
+        clickTemplateHandlers,
+      ) {
+        const getItemIdForEvent = ({ eventItem, key }) => {
+          const depth = handlerDepthMap.get(key);
+
+          for (let i = 0; i < depth; i++) {
+            eventItem = eventItem.parentNode;
+          }
+          return eventItem.data_id;
+        };
+
+        templateRoot.addEventListener("click", (e) => {
+          const clickId =
+            e.target.getAttribute("data-click-id") ||
+            e.target.parentNode.getAttribute("data-click-id") ||
+            e.target.parentNode.parentNode.getAttribute("data-click-id");
+
+          if (clickId) {
+            const key = "data-click-id_" + clickId;
+            const componentId = getItemIdForEvent({
+              eventItem: e.target,
+              key: key,
+            });
+
+            const handlerName = clickTemplateEvents[clickId];
+            clickTemplateHandlers[handlerName]({
+              componentId: componentId,
+            });
+          }
+        });
+      })(
+        this.#templateRoot,
+        this.#handlerDepthMap,
+        this.#clickTemplateEvents,
+        this.#clickTemplateHandlers,
+      );
+    }
+  }
+
+  getSignalByFieldName(fieldName) {
+    return this.#signalMap.get(fieldName);
+  }
+
+  getAllSignals() {
+    return this.#signalMap.values();
+  }
+
+  #evaluateConditional(templateStr) {
+    const split = templateStr.split("\n");
+
+    while (true) {
+      let depth = 0;
+
+      let firstIfPos;
+      let elsePos;
+      let endPos;
+
+      for (let i = 0; i < split.length; i++) {
+        if (split[i].includes("{#if")) {
+          depth++;
+          if (!firstIfPos) {
+            firstIfPos = i;
+          }
+        }
+
+        if (split[i].includes("{else}")) {
+          if (depth === 1) {
+            elsePos = i;
+          }
+        }
+
+        if (split[i].includes("{/if}")) {
+          depth--;
+          if (depth === 0) {
+            endPos = i;
+            break;
+          }
+        }
+      }
+
+      if (!firstIfPos) {
+        break;
+      } else {
+        const ifCheckName = split[firstIfPos]
+          .trim()
+          .split(" ")[1]
+          .split("}")[0];
+        const ifCheck = TemplateItem.#templateFunctions.get(ifCheckName);
+
+        if (!ifCheck) {
+          throw new Error(`No template function defined for ${ifCheckName}`);
+        }
+
+        if (ifCheck()) {
+          split.splice(endPos, 1);
+
+          if (elsePos) {
+            split.splice(elsePos, endPos - elsePos);
+          }
+          split.splice(firstIfPos, 1);
+        } else {
+          split.splice(endPos, 1);
+          split.splice(firstIfPos, elsePos - firstIfPos + 1);
+        }
+        firstIfPos = null;
+        elsePos = null;
+        endPos = null;
+      }
+    }
+    return split.join("\n");
+  }
+
+  #defineComponent(templateStr) {
+    templateStr = this.#evaluateConditional(templateStr);
+
+    this.#changeTemplateEvents = [];
+    this.#clickTemplateEvents = [];
+    const start = Date.now();
+
+    this.#templateSignals = [];
+
+    let tokens = [];
+
+    let startPos;
+    let isHtmlTagSection;
+
+    //Tokenize template string.
+    for (let i = 0; i < templateStr.length; i++) {
+      const templateChar = templateStr.charAt(i);
+
+      if (!startPos) {
+        startPos = i;
+        isHtmlTagSection = templateChar === "<";
+      } else if (isHtmlTagSection && templateChar === ">") {
+        const token = templateStr.substring(startPos, i + 1);
+
+        const sections = token.split("}");
+        let startSection;
+
+        const templateAttrs = [];
+        for (let j = 0; j < sections.length; j++) {
+          const section = sections[j];
+          const equalPos = section.lastIndexOf("=");
+          const spacePos = section.lastIndexOf(" ", equalPos);
+
+          if (j === 0) {
+            startSection = section.substring(0, spacePos + 1);
+          }
+
+          if (j < sections.length - 1) {
+            templateAttrs.push({
+              attr: section.substring(spacePos + 1, equalPos),
+              fieldName: section.substring(equalPos + 3),
+            });
+          }
+        }
+
+        let endSection = sections[sections.length - 1];
+        if (templateAttrs.length > 0) {
+          if (endSection.startsWith('">')) {
+            endSection = endSection.substring(0, endSection.length - 2) + ">";
+          }
+        } else {
+          startSection = token.substring(0, token.length - 1);
+          endSection = ">";
+        }
+        tokens.push({
+          endSection: endSection,
+          isHtml: true,
+          startSection: startSection,
+          templateAttrs: templateAttrs,
+        });
+
+        startPos = null;
+        isHtmlTagSection = false;
+      } else {
+        if (templateChar === "<") {
+          let token = templateStr
+            .substring(startPos, i)
+            .replaceAll("\t", "")
+            .replaceAll("\n", "")
+            .trim();
+          if (token.trim().length > 0) {
+            tokens.push({
+              isHtml: false,
+              token: token,
+            });
+          }
+
+          startPos = null;
+          i--;
+        }
+      }
+    }
+
+    //Determine signals and event handlers.
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (token.isHtml) {
+        for (let j = 0; j < token.templateAttrs.length; j++) {
+          let attr = token.templateAttrs[j].attr;
+          if (attr.startsWith("on")) {
+            if (attr === "onchange" || attr === "onChange") {
+              token.templateAttrs[j].signalRef =
+                `data-change-id=${this.#changeTemplateEvents.length}`;
+              this.#changeTemplateEvents.push(token.templateAttrs[j].fieldName);
+            }
+            if (attr === "onclick" || attr === "onClick") {
+              token.templateAttrs[j].signalRef =
+                `data-click-id=${this.#clickTemplateEvents.length}`;
+              this.#clickTemplateEvents.push(token.templateAttrs[j].fieldName);
+            }
+          } else {
+            const signalId = this.#templateSignals.length;
+            const signalRef = i > 0 ? `data-signal-id-${signalId}` : ``;
+
+            if (attr === "innerhtml") {
+              attr = "innerHTML";
+            }
+
+            const signalData = {
+              attr: attr,
+              fieldName: token.templateAttrs[j].fieldName,
+              signalId: i > 0 ? signalId : -1,
+              signalPath: signalRef,
+            };
+
+            token.templateAttrs[j].signalRef = signalRef;
+            this.#templateSignals.push(signalData);
+          }
+        }
+      } else {
+        if (tokens[i].token.includes("{")) {
+          const nameStart = tokens[i].token.indexOf("{");
+          const nameEnd = tokens[i].token.indexOf("}");
+          const fieldName = tokens[i].token.substring(nameStart + 1, nameEnd);
+
+          const signalId = this.#templateSignals.length;
+          const signalRef = i > 0 ? `data-signal-id-${signalId}` : ``;
+
+          const signalData = {
+            attr: "textcontent",
+            fieldName: fieldName,
+            signalId: signalId,
+            signalPath: signalRef,
+          };
+
+          tokens[i - 1].templateAttrs.push({
+            attr: "textcontent",
+            fieldName: fieldName,
+            signalRef: signalRef,
+          });
+          this.#templateSignals.push(signalData);
+        } else {
+          tokens[i].textcontent = tokens[i].token;
+        }
+      }
+    }
+
+    // Create new string with references to event handlers and signals.
+    let templateArr = [];
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      if (token.isHtml) {
+        if (token.templateAttrs.length > 0) {
+          templateArr.push(token.startSection);
+
+          for (let j = 0; j < token.templateAttrs.length; j++) {
+            templateArr.push(" " + token.templateAttrs[j].signalRef + " ");
+          }
+          templateArr.push(token.endSection);
+        } else {
+          templateArr.push(token.startSection + token.endSection);
+        }
+      } else {
+        if (token.textcontent) {
+          templateArr.push(token.textcontent);
+        }
+      }
+    }
+
+    let template = document.createElement("template");
+    template.innerHTML = templateArr.join("");
+    this.#templateNode = template.content.firstChild;
+
+    const handlerAttrs = ["data-click-id", "data-change-id"];
+
+    handlerAttrs.forEach((handlerAttr) => {
+      const attrSelector = `[${handlerAttr}]`;
+
+      this.#templateNode.querySelectorAll(attrSelector).forEach((node) => {
+        const clickNum = node.attributes[handlerAttr].value;
+
+        let depth = 0;
+        while (node.parentNode.nodeName !== "#document-fragment") {
+          if (node.parentNode !== null) {
+            node = node.parentNode;
+            depth++;
+          }
+        }
+        const handlerDepthKey = `${handlerAttr}_${clickNum}`;
+        this.#handlerDepthMap.set(handlerDepthKey, depth);
+      });
+    });
+
+    for (let i = 0; i < this.#templateSignals.length; i++) {
+      const signal = this.#templateSignals[i];
+
+      // A signal id of less than one means that the data is
+      // at the root.
+      if (signal.signalId >= 0) {
+        const selector = `[${signal.signalPath}]`;
+
+        let childNodePath = [];
+        let node = template.content.querySelector(selector);
+        let searchNode = node;
+
+        while (searchNode.parentNode.nodeName !== "#document-fragment") {
+          for (let j = 0; j < searchNode.parentNode.childNodes.length; j++) {
+            if (Object.is(searchNode.parentNode.childNodes[j], searchNode)) {
+              childNodePath.push(`:nth-child(${j + 1})`);
+            }
+          }
+          searchNode = searchNode.parentNode;
+        }
+
+        childNodePath = childNodePath.reverse();
+        node.attributes.removeNamedItem(signal.signalPath);
+        signal.signalPath = childNodePath.join(">");
+      }
+    }
+
+    this.#initSignalMap();
+
+    //Tenplate parsing needs to be optimized for performance.
+    //This is to display the overhead of the current logic.
+    const parseTime = Date.now() - start;
+    if (parseTime > 0) {
+      console.warn(`Slow template parse time of ${parseTime} miliseconds`);
+    }
+  }
+
+  isAttributeChar(str) {
+    const code = str.charCodeAt(0);
+    return (code > 64 && code < 91) || (code > 96 && code < 123);
+  }
+
+  setDataField(dataField) {
+    this.dataField = dataField;
+  }
+
+  getDataField() {
+    return this.dataField;
+  }
+
+  setId(id) {
+    this.id = id;
+  }
+
+  setTemplateName(templateName) {
+    this.templateName = templateName.toUpperCase();
+  }
+
+  setTemplateRoot(root) {
+    this.#templateRoot = root;
+  }
+
+  //TOOD: Fix bug related to this.#templateNode no longer being valid.
+  setSingleNode(node) {
+    this.#templateNode = document.querySelector("[data-template]");
+    this.#templateNode.replaceChildren(node);
+  }
+
+  appendNode(node) {
+    this.#templateRoot.appendChild(node);
+  }
+
+  appendChild(fragment) {
+    this.#templateRoot.appendChild(fragment);
+  }
+
+  getTemplateNode() {
+    return this.#templateNode;
+  }
+
+  addNode(id, node) {
+    this.#nodes[id] = node;
+  }
+
+  getNode(id) {
+    return this.#nodes[id];
+  }
+
+  getFirstNode() {
+    return this.#nodes[0];
+  }
+
+  removeChild(id) {
+    this.#templateRoot.removeChild(this.#nodes[id]);
+  }
+
+  clearNodes() {
+    this.#templateRoot.replaceChildren([]);
+    setTimeout(() => {
+      Object.keys(this.#nodes).forEach((id) => {
+        this.#nodes[id] = null;
+      });
+      this.#nodes = {};
+    }, 0);
+  }
+
+  setTemplateHtml(html) {
+    this.#templateRoot.innerHTML = html;
+  }
+
+  getTemplateHtml() {
+    return this.#templateNode.innerHTML;
+  }
+}
+
+TemplateItem.addTemplateFunction("isMobile", () => {
+  return window.matchMedia("(max-width: 32em)").matches;
+});
+
+class PresentationComponent extends HTMLElement {
+  #changeTemplateEvents = {};
+  #clickTemplateEvents = {};
+
+  #lightDomHTML = "<p>Use light DOM or render() method to show HTML</p>";
+  #loadingAnimationStart;
+  #loadingIndicatorConfig;
+
+  #selectorCache = new Map();
+  #subscribedStore;
+
+  #templateItem;
+
+  static #templateCount = 0;
+  static clickHandlerCount = 0;
+  static changeHandlerCount = 0;
+
+  /**
+   * @param dataStore The data store a component is subscribed to.
+   * @param loadingIndicatorConfig Configuration for the loading indicator
+   **/
+  constructor(dataStore) {
+    super();
+    this.#subscribedStore = dataStore;
+  }
+
+  startLoadingIndicator() {
+    this.#lightDomHTML = this.innerHTML;
+    this.innerHTML =
+      this.#loadingIndicatorConfig.generateLoadingIndicatorHtml();
+    this.#loadingAnimationStart = Date.now();
+  }
+
+  connectedCallback() {
+    const defaultStore = this.dataset["store"];
+
+    if (defaultStore) {
+      const loadingIndicatorComponent = this.dataset["loadingIndicator"];
+      if (loadingIndicatorComponent) {
+        const imagePath = this.dataset["loadingImage"];
+        const loadingHTML = `
+            <${loadingIndicatorComponent}
+						  ${imagePath ? `image-path=${imagePath}` : ``}	
+            >
+					  </${loadingIndicatorComponent}>`;
+
+        this.#loadingIndicatorConfig = {
+          generateLoadingIndicatorHtml: () => {
+            return loadingHTML;
+          },
+          minTimeMs: 500,
+        };
+        this.startLoadingIndicator();
+      }
+
+      const dataStore = DataStore.getStore(defaultStore);
+      this.#subscribedStore = DataStore.getStore(defaultStore);
+
+      dataStore.subscribeComponent(this);
+    }
+
+    if (this.querySelector("[data-template]")) {
+      this.#setupTemplate();
+    }
+  }
+
+  init(initialState) {
+    this.updateData(initialState);
+  }
+
+  setClickEvents(events) {
+    this.#clickTemplateEvents = events;
+  }
+
+  setChangeEvents(events) {
+    this.#changeTemplateEvents = events;
+  }
+
+  #generateSignal(params) {
+    const { fieldName, attr, signalId, signalPath } = params.signalConfig;
+
+    const { signalData, elementRoot } = params.updateData;
+
+    if (signalData[fieldName] === undefined) {
+      return;
+    }
+
+    let element = elementRoot;
+
+    if (signalPath) {
+      const cacheId = `${elementRoot.data_id}-${signalId}`;
+
+      if (!this.#selectorCache.has(cacheId)) {
+        element = element.querySelector(signalPath);
+        this.#selectorCache.set(cacheId, element);
+      } else {
+        element = this.#selectorCache.get(cacheId);
+      }
+    }
+
+    if (attr === "textcontent") {
+      element.innerText = signalData[fieldName];
+    }
+    if (attr === "innerHTML") {
+      element.innerHTML = signalData[fieldName];
+    } else {
+      element.setAttribute(attr, `${signalData[fieldName]}`);
+    }
+  }
+
+  /**
+   * Unsubscribe component when it is removed from the UI.
+   **/
+  disconnectedCallback() {
+    this.#subscribedStore.unsubscribeComponent(this);
+  }
+
+  async #completeLoadAnimation() {
+    if (!this.#loadingIndicatorConfig) {
+      return;
+    }
+    const remainTime = Date.now() - this.#loadingAnimationStart;
+
+    const promise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, remainTime);
+    });
+
+    await Promise.resolve(promise);
+    this.innerHTML = this.#lightDomHTML;
+    this.#loadingAnimationStart = null;
+  }
+
+  #setupTemplate() {
+    let templateNode = this.querySelector("[data-template]");
+
+    //Component does not have a temnplate
+    if (!templateNode) {
+      return;
+    }
+
+    templateNode.style.visibility = "initial";
+
+    let templateHTML = templateNode.innerHTML;
+
+    templateNode.innerHTML = "";
+    this.#templateItem = new TemplateItem(templateHTML);
+
+    templateNode.innerHTML = "";
+    this.#templateItem.setTemplateRoot(templateNode);
+    this.#templateItem.setDataField(
+      templateNode?.getAttributeNode("data-template").value,
+    );
+    this.#templateItem.setId(
+      `template-${PresentationComponent.#templateCount}`,
+    );
+    this.#templateItem.setTemplateName(this.nodeName);
+
+    this.#templateItem.setupClickEventHandlers(this.#clickTemplateEvents);
+    this.#templateItem.setupChangeEventHandlers(this.#changeTemplateEvents);
+  }
+
+  updateSingleItem(state) {
+    if (!this.#templateItem) {
+      this.#setupTemplate();
+    }
+    const node = this.#templateItem.getFirstNode();
+    const templateNode = this.#templateItem.getTemplateNode();
+
+    if (!node) {
+      const addNode = templateNode.cloneNode(true);
+      const iter = this.#templateItem.getAllSignals();
+      while (true) {
+        const signalConfig = iter.next().value;
+
+        if (!signalConfig) {
+          break;
+        }
+
+        if (state[signalConfig.fieldName] === undefined) {
+          console.error(
+            `No state defined for template field ${signalConfig.fieldName}`,
+          );
+        }
+        this.#generateSignal({
+          signalConfig: signalConfig,
+          updateData: {
+            signalData: state,
+            elementRoot: addNode,
+          },
+        });
+      }
+      //TODO: Refactor. Having addNode and appendNode can
+      // be confusing.
+      this.#templateItem.addNode(0, addNode);
+      this.#templateItem.setSingleNode(addNode);
+    } else {
+      const iter = this.#templateItem.getAllSignals();
+      while (true) {
+        const signalConfig = iter.next().value;
+
+        if (!signalConfig) {
+          break;
+        }
+
+        if (state[signalConfig.fieldName]) {
+          this.#generateSignal({
+            signalConfig: signalConfig,
+            updateData: {
+              signalData: state,
+              elementRoot: this.#templateItem.getNode(0),
+            },
+          });
+        }
+      }
+    }
+  }
+
+  async addItems(addFragments) {
+    if (this.#loadingAnimationStart) {
+      await this.#completeLoadAnimation();
+    }
+    if (!this.#templateItem) {
+      this.#setupTemplate();
+    }
+
+    const templateNode = this.#templateItem.getTemplateNode();
+
+    for (let j = 0; j < addFragments.length; j++) {
+      const { insertBefore, insertData } = addFragments[j];
+      let addFragment = document.createDocumentFragment();
+
+      for (let k = 0; k < insertData.length; k++) {
+        const addNode = templateNode.cloneNode(true);
+        const iter = this.#templateItem.getAllSignals();
+
+        addNode.data_id = insertData[k].id;
+        this.#templateItem.addNode(insertData[k].id, addNode);
+
+        while (true) {
+          const signalConfig = iter.next().value;
+
+          if (!signalConfig) {
+            break;
+          }
+
+          //if(insertData[k][signalConfig.fieldName]){
+          this.#generateSignal({
+            signalConfig: signalConfig,
+            updateData: {
+              signalData: insertData[k],
+              elementRoot: addNode,
+            },
+          });
+          //}
+        }
+        addFragment.appendChild(addNode);
+      }
+
+      if (insertBefore !== -1) {
+        const lastNode = this.#templateItem.getNode(insertBefore);
+        lastNode.parentNode.insertBefore(addFragment, lastNode);
+      } else {
+        this.#templateItem.appendChild(addFragment);
+      }
+    }
+  }
+
+  removeItems(removeData, isReplace, isClear) {
+    if (this.#loadingAnimationStart !== null) {
+      this.#completeLoadAnimation();
+    }
+    if (isClear && !isReplace) {
+      this.#templateItem.clearNodes();
+    } else {
+      removeData.forEach((id) => {
+        this.#templateItem.removeChild(id);
+      });
+    }
+
+    setTimeout(() => {
+      if (isClear) {
+        this.#selectorCache.clear();
+      } else {
+        for (const [key] of this.#selectorCache) {
+          const nodeId = key.split("-")[0];
+          if (removeData.has(parseInt(nodeId))) {
+            this.#selectorCache.delete(key);
+          }
+        }
+      }
+    }, 0);
+  }
+
+  swapUpdates(swapUpdates) {
+    for (let m = 0; m < swapUpdates.length; m++) {
+      const { moveNodeId, moveBeforeId } = swapUpdates[m];
+      const nodeToMove = this.#templateItem.getNode(moveNodeId);
+
+      if (moveBeforeId !== null) {
+        const moveBefore = this.#templateItem.getNode(moveBeforeId);
+        moveBefore.parentNode.insertBefore(nodeToMove, moveBefore);
+      } else {
+        nodeToMove.parentNode.appendChild(nodeToMove);
+      }
+    }
+  }
+
+  async updateVisible(data) {
+    if (!this.#templateItem) {
+      this.#completeLoadAnimation();
+      return;
+    }
+    if (this.#loadingAnimationStart !== null) {
+      this.#completeLoadAnimation();
+    }
+
+    const updates = data[this.#templateItem.dataField] || [];
+    for (let i = 0; i < updates.length; i++) {
+      let attrName, attrValue, id;
+
+      Object.keys(updates[i]).forEach((key) => {
+        if (key === "id") {
+          id = updates[i][key];
+        } else {
+          attrName = key;
+          attrValue = updates[i][key];
+        }
+      });
+
+      if (id) {
+        const updateConfig = {
+          signalConfig: this.#templateItem.getSignalByFieldName(attrName),
+          updateData: {
+            signalData: { [attrName]: attrValue },
+            elementRoot: this.#templateItem.getNode(id),
+          },
+        };
+
+        this.#generateSignal(updateConfig);
+      }
+    }
+  }
+}
+
+class ShadowDOMComponent extends HTMLElement {
+  connectedCallback() {
+    this.attachShadow({ mode: "open" });
+
+    this.shadowRoot;
+    const template = document.createElement("template");
+
+    template.innerHTML = this.getTemplateStyle() + `<div></div>`;
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.shadowRoot.querySelector("div").innerHTML = this.render();
+  }
+}
+
+class StaticComponent extends HTMLElement {
+  static #clickSplitRegex = new RegExp('onclick="{', "i");
+  #handlerMap = {};
+
+  constructor() {
+    super();
+
+    const split = this.innerHTML.split(StaticComponent.#clickSplitRegex);
+    for (let i = 1; i < split.length; i++) {
+      const sectionSplit = split[i].split("}");
+      const handlerName = sectionSplit[0];
+      split[i] =
+        `data-${this.nodeName}-click="${handlerName}"${sectionSplit[1]}`;
+    }
+    this.innerHTML = split.join("");
+  }
+
+  setClickEvents(handlerConfig) {
+    const clickSelectorName = `data-${this.nodeName.toLowerCase()}-click`;
+
+    this.querySelectorAll(`[${clickSelectorName}]`).forEach((node) => {
+      const eventHandlerName = node.attributes[clickSelectorName].value;
+
+      node.id = eventHandlerName;
+      node.removeAttribute(clickSelectorName);
+
+      this.#handlerMap[node.id] = handlerConfig[eventHandlerName];
+    });
+
+    this.addEventListener("click", (e) => {
+      const clickId = e.target?.id;
+
+      if (this.#handlerMap[clickId]) {
+        this.#handlerMap[clickId](e);
+      }
+    });
+  }
+}
+
+export { ApiLoadAction, CustomLoadSignal, DataStore, DataStoreSignal, ItemUpdater, ListUpdater, PresentationComponent, ShadowDOMComponent, StaticComponent, TemplateItem };

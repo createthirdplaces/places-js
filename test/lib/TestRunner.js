@@ -21,20 +21,24 @@ export class TestRunner {
 
   static createRunnerWithTests(testConfig){
 
-    const testMap = new Map();
+    const tests = [];
 
     const testNames = Object
-      .getOwnPropertyNames(testConfig)
+      .getOwnPropertyNames(Object.getPrototypeOf(testConfig))
       .filter((name)=>{
-        (typeof testConfig[name] === "function") && name.startsWith("test")
+        const field = testConfig[name];
+        return (typeof field === "function") && field.name.startsWith("test")
       });
+
     for(let i=0; i< testNames.length; i++){
-      testMap.push({
-        "testName":testName,
-        "testFunction":testFunction
+      tests.push({
+        "id": testNames[i],
+        "testName":testNames[i],
+        "testFunction":testConfig[testNames[i]]
       });
     }
-    const testRunner = new TestRunner(testConfig.getName(), testMap);
+
+    const testRunner = new TestRunner(testConfig.getName(), tests);
     TestRunner.#runnerList.push(testRunner);
   }
 
@@ -43,7 +47,7 @@ export class TestRunner {
   }
 
   static runAllTests(){
-    for(let i=0; i<runnerList.length;i++){
+    for(let i=0; i<TestRunner.#runnerList.length;i++){
       TestRunner.#runnerList[i].runAllTests();
     }
   }
@@ -54,12 +58,20 @@ export class TestRunner {
 
   runAllTests() {
 
-    for(let i=0;i<tests.length;i++){
-      const test = tests[i];
-      TestRunner.#activeTestName = test.name;
-      test[i].runTest();
+    TestRunner.activeResults = new Map();
+    for(let i=0;i<this.#tests.length;i++){
+      const test = this.#tests[i];
+      TestRunner.#activeTestName = test.testName;
+      test.testFunction();
     }
-    this.#resultStore.updateStoreData({"testResults":TestRunner.activeResults});
+
+
+    const resultArray = [];
+    TestRunner.#activeResults.forEach((value,key)=>{
+      resultArray.push({...value,id:key});
+    });
+
+    this.#resultStore.updateStoreData({"testResults":resultArray});
     TestRunner.activeResults = new Map();
   }
 }

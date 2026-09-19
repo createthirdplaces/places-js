@@ -35,6 +35,7 @@ export class DataStore {
   #updater;
 
   constructor(loadAction, storeName, updater = new DefaultUpdater()) {
+
     this.#subscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
 
@@ -62,6 +63,10 @@ export class DataStore {
 
   static getStore(storeName) {
     return this.#storeNameMap.get(storeName);
+  }
+
+  static clearStores(){
+    this.#storeNameMap.clear();
   }
 
   static createWithApiLoadSignal({
@@ -140,13 +145,13 @@ export class DataStore {
 
       if (isArray) {
         return new DataStore(
-          new DataStoreSignal(storeSignals),
+          new CustomLoadSignal(loadAction),
           storeName,
           new ListUpdater(presentationSignals),
         );
       } else {
         return new DataStore(
-          new DataStoreSignal(storeSignals),
+          new CustomLoadSignal(loadAction),
           storeName,
           new ItemUpdater(presentationSignals),
         );

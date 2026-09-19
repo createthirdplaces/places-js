@@ -7,8 +7,14 @@ export class TestStore extends DataStore {
     const presentationSignals = {
       testResults:{
         update: {
-          message: (testData)=>{
-            return testData.pass ? "success" : "fail"
+          message: (testData) => {
+            if(testData.message){
+              return testData.message;
+            }
+            return "";
+          },
+          isPass: (testData)=>{
+            return testData.isPass ? "success" : "fail"
           },
           name: (testData)=>{
             return testData.id;

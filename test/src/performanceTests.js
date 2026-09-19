@@ -1,17 +1,124 @@
-import {assertEquals, assertResult, assertTrue} from '/lib/TestRunner.js'
+import {assertEquals, assertResult, assertTrue, TestRunner} from '/lib/TestRunner.js'
+
+import {DataStore} from '/src/places-js-latest.js';
+
+class FakeComponent {
+  addItems(){
+    console.log("Adding");
+  }
+  
+  removeItems() {
+    console.log("Removing");
+  }
+
+  swapUpdates(){
+    console.log("Swap");
+  }
+
+  updateVisible(){
+    console.log("Update visible");
+  }
+
+}
+
+const generateEmptyData = () =>{
+  return {
+    data: []
+  }
+}
 
 export class PerformanceTests {
+
+  #fakeComponent;
+  #rowDataA;
+  #testStore;
+
+  constructor() {
+    const rows = [];
+    for(let i=0; i<1000; i++){
+      rows.push({
+        "fieldA": "test_"+i,
+        "fieldB": "second_"+i,
+        "id": i
+      });
+    }
+    this.#rowDataA = {
+      "data": rows
+    }
+  }
+
+  beforeEach() {
+    const presentationSignals = {
+      data:{
+        update: {
+          fieldA: (data)=>{
+            return data.fieldA
+          },
+          fieldB: (data)=>{
+            return data.fieldB
+          }
+        }
+      }
+    }
+    this.#testStore = DataStore.createWithCustomLoadSignal({
+      "loadAction": generateEmptyData,
+      "storeName": "test-store",
+      "presentationSignals": presentationSignals
+    });
+
+    this.#fakeComponent = new FakeComponent();
+    this.#testStore.subscribeComponent(this.#fakeComponent);
+    TestRunner.observeCalls(this.#fakeComponent);
+  }
+
+  afterEach() {
+    DataStore.clearStores();
+  }
 
   getName(){
     return "performance-tests";
   }
 
   testStorePerformance_addLargeList() {    
-    assertResult({time: 22});
+
+    this.#testStore.updateStoreData(this.#rowDataA);
+
+    const lastAdd = this.#fakeComponent.getLastCallParams("addItems");
+    
+    let isValid = true;
+    let error = null;
+
+    if(lastAdd.length !== 1){
+      isValid = false;
+      error = "Incorrect add segments";
+    }
+    if(lastAdd[0].insertBefore !== -1){
+      isValid = false;
+      error = "Invalid insertBefore value";
+    }
+
+    for(let i=0; i<lastAdd[0].length;i++){
+      const item = lastAdd[0][i];
+
+      if(!lastAdd.fieldA || !lastAdd.fieldB || !lastAdd.id){
+        isValid = false;
+        error = "Invalid data for field";
+      }
+    }
+
+    if(lastAdd[0].insertData.length !== 1000){
+      isValid = false;
+      error = `Incorrect length`;
+    }
+
+    assertResult({
+      message: isValid ? "" : error,
+      "isPass": isValid,
+    });
   }
 
   testFillerTest() {
-    assertResult({time: 22, success: false, error: "Test not implemented"});
+    assertResult({time: 22, isPass: false, message: "Test not implemented"});
   }
 
   testFillerTest_Two(){

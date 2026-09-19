@@ -24,7 +24,9 @@ export class ListUpdater {
     let changeData = new Map();
 
     for (let i = 0; i < this.#listFields.length; i++) {
+
       const field = this.#listFields[i];
+
       if (!storeUpdates[field]) {
         continue;
       }
@@ -95,6 +97,7 @@ export class ListUpdater {
         updatedOrdering,
       );
       this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
+
 
       if (!this.#isReplace && !this.#isClear) {
         const arrayChanges = [];

@@ -9,14 +9,16 @@ export class TestRunner {
   static #runnerList = [];
 
   #name;
-  #tests;
-
   #resultStore;
-  
-  constructor(name, tests) {
-    this.#name = name;
-    this.#tests = tests;
+  #testConfig;
+  #tests;
+ 
+  constructor(testConfig, tests) {
+
+    this.#name = testConfig.getName();
     this.#resultStore = TestStore.createStore(this);
+    this.#testConfig = testConfig;
+    this.#tests = tests;
   }
 
   static createRunnerWithTests(testConfig){
@@ -34,22 +36,52 @@ export class TestRunner {
       tests.push({
         "id": testNames[i],
         "testName":testNames[i],
-        "testFunction":testConfig[testNames[i]]
+        "testFunction":testConfig[testNames[i]].bind(testConfig)
       });
     }
 
-    const testRunner = new TestRunner(testConfig.getName(), tests);
+    const testRunner = new TestRunner(testConfig, tests);
     TestRunner.#runnerList.push(testRunner);
   }
 
-  static saveResultToTest(result){
-    TestRunner.#activeResults.set(TestRunner.#activeTestName, result);
+  static observeCalls(testObject){
+    const functionNames = Object
+      .getOwnPropertyNames(Object.getPrototypeOf(testObject))
+      .filter((name)=>{
+        const field = testObject[name];
+        return (typeof field === "function")
+      });
+
+    testObject.observedCalls = new Map();
+
+    testObject.getLastCallParams = (functionName) => {
+      const params = testObject.observedCalls.get(functionName);
+      return params[params.length - 1];
+    }
+
+    for(let i =0; i<functionNames.length; i++){
+
+      const name = functionNames[i];
+      const copyName = `${name}_a`;
+
+      testObject.observedCalls.set(name,[]);
+      
+      testObject[copyName] = testObject[name];
+      testObject[name] = (data)=>{
+        testObject.observedCalls.get(name).push(data);
+        testObject[copyName](data);
+      }
+    }
   }
 
   static runAllTests(){
     for(let i=0; i<TestRunner.#runnerList.length;i++){
       TestRunner.#runnerList[i].runAllTests();
     }
+  }
+
+  static saveResultToTest(result){
+    TestRunner.#activeResults.set(TestRunner.#activeTestName, result);
   }
 
   getName() {
@@ -62,9 +94,17 @@ export class TestRunner {
     for(let i=0;i<this.#tests.length;i++){
       const test = this.#tests[i];
       TestRunner.#activeTestName = test.testName;
-      test.testFunction();
-    }
 
+      if(this.#testConfig.beforeEach){
+        this.#testConfig.beforeEach(); 
+      }
+
+      test.testFunction();
+
+      if(this.#testConfig.afterEach){
+        this.#testConfig.afterEach(); 
+      } 
+    }
 
     const resultArray = [];
     TestRunner.#activeResults.forEach((value,key)=>{

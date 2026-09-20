@@ -138,7 +138,5 @@ export class PerformanceTests {
         "isPass":true
       });
     }
-
   }
-
 }

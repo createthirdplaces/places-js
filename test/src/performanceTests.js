@@ -1,25 +1,6 @@
-import {assertEquals, assertResult, assertTrue, TestRunner} from '/lib/TestRunner.js'
+import {assertEquals, assertResult, assertTrue, createMock, observeCalls, TestRunner} from '/lib/TestRunner.js'
 
-import {DataStore} from '/src/places-js-latest.js';
-
-class FakeComponent {
-  addItems(){
-    console.log("Adding");
-  }
-  
-  removeItems() {
-    console.log("Removing");
-  }
-
-  swapUpdates(){
-    console.log("Swap");
-  }
-
-  updateVisible(){
-    console.log("Update visible");
-  }
-
-}
+import {DataStore, PresentationComponent} from '/src/places-js-latest.js';
 
 const generateEmptyData = () =>{
   return {
@@ -29,7 +10,7 @@ const generateEmptyData = () =>{
 
 export class PerformanceTests {
 
-  #fakeComponent;
+  #mockComponent;
   #rowDataA;
   #testStore;
 
@@ -66,9 +47,9 @@ export class PerformanceTests {
       "presentationSignals": presentationSignals
     });
 
-    this.#fakeComponent = new FakeComponent();
-    this.#testStore.subscribeComponent(this.#fakeComponent);
-    TestRunner.observeCalls(this.#fakeComponent);
+    this.#mockComponent = createMock(PresentationComponent);
+    this.#testStore.subscribeComponent(this.#mockComponent);
+    observeCalls(this.#mockComponent);
   }
 
   afterEach() {
@@ -83,7 +64,7 @@ export class PerformanceTests {
 
     this.#testStore.updateStoreData(this.#rowDataA);
 
-    const lastAdd = this.#fakeComponent.getLastCallParams("addItems");
+    const lastAdd = this.#mockComponent.getLastCallParams("addItems");
     
     let isValid = true;
     let error = null;

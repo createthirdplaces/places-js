@@ -43,37 +43,8 @@ export class TestRunner {
     const testRunner = new TestRunner(testConfig, tests);
     TestRunner.#runnerList.push(testRunner);
   }
-
-  static observeCalls(testObject){
-    const functionNames = Object
-      .getOwnPropertyNames(Object.getPrototypeOf(testObject))
-      .filter((name)=>{
-        const field = testObject[name];
-        return (typeof field === "function")
-      });
-
-    testObject.observedCalls = new Map();
-
-    testObject.getLastCallParams = (functionName) => {
-      const params = testObject.observedCalls.get(functionName);
-      return params[params.length - 1];
-    }
-
-    for(let i =0; i<functionNames.length; i++){
-
-      const name = functionNames[i];
-      const copyName = `${name}_a`;
-
-      testObject.observedCalls.set(name,[]);
-      
-      testObject[copyName] = testObject[name];
-      testObject[name] = (data)=>{
-        testObject.observedCalls.get(name).push(data);
-        testObject[copyName](data);
-      }
-    }
-  }
-
+  
+  
   static runAllTests(){
     for(let i=0; i<TestRunner.#runnerList.length;i++){
       TestRunner.#runnerList[i].runAllTests();
@@ -131,3 +102,61 @@ export function assertEquals(first, second){
     pass: first === second
   });
 }
+
+
+export function createMock(classRef){
+  const mock = new Object();
+
+  const propNames = Object.getOwnPropertyNames(classRef.prototype);
+  
+  for(let i=0; i<propNames.length;i++){
+    const func = function(){return null};
+    const name = propNames[i]
+    mock[name] = func;
+  }
+  return mock;
+}
+
+export function observeCalls(testObject){
+    console.log(Object.keys(testObject));
+
+    let functionNames = [];
+
+    if(testObject.prototype){
+      functionNames = Object
+        .getOwnPropertyNames(Object.getPrototypeOf(testObject))
+        .filter((name)=>{
+          console.log(name);
+          const field = testObject[name];
+          return (typeof field === "function")
+        });
+    } else {
+      const props = Object.keys(testObject);
+      for(let i=0; i<props.length; i++){
+        functionNames.push(props[i]);
+      }
+    }
+
+    testObject.observedCalls = new Map();
+
+    testObject.getLastCallParams = (functionName) => {
+      console.log(testObject.observedCalls);
+      const params = testObject.observedCalls.get(functionName);
+      return params[params.length - 1];
+    }
+
+    for(let i =0; i<functionNames.length; i++){
+
+      const name = functionNames[i];
+      const copyName = `${name}_a`;
+
+      testObject.observedCalls.set(name,[]);
+      
+      testObject[copyName] = testObject[name];
+      testObject[name] = (data)=>{
+        testObject.observedCalls.get(name).push(data);
+        testObject[copyName](data);
+      }
+    }
+  }
+

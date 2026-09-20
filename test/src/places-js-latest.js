@@ -1442,7 +1442,7 @@ class PresentationComponent extends HTMLElement {
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
     }
-    if (attr === "innerHTML") {
+    else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];
     } else {
       element.setAttribute(attr, `${signalData[fieldName]}`);

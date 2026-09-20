@@ -61,6 +61,7 @@ export class TestRunner {
 
   runAllTests() {
 
+    console.log("Running");
     TestRunner.activeResults = new Map();
     for(let i=0;i<this.#tests.length;i++){
       const test = this.#tests[i];
@@ -81,6 +82,7 @@ export class TestRunner {
     TestRunner.#activeResults.forEach((value,key)=>{
       resultArray.push({...value,id:key});
     });
+
 
     this.#resultStore.updateStoreData({"testResults":resultArray});
     TestRunner.activeResults = new Map();
@@ -118,7 +120,6 @@ export function createMock(classRef){
 }
 
 export function observeCalls(testObject){
-    console.log(Object.keys(testObject));
 
     let functionNames = [];
 
@@ -126,7 +127,6 @@ export function observeCalls(testObject){
       functionNames = Object
         .getOwnPropertyNames(Object.getPrototypeOf(testObject))
         .filter((name)=>{
-          console.log(name);
           const field = testObject[name];
           return (typeof field === "function")
         });
@@ -140,7 +140,6 @@ export function observeCalls(testObject){
     testObject.observedCalls = new Map();
 
     testObject.getLastCallParams = (functionName) => {
-      console.log(testObject.observedCalls);
       const params = testObject.observedCalls.get(functionName);
       return params[params.length - 1];
     }

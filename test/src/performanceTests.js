@@ -12,6 +12,7 @@ export class PerformanceTests {
 
   #mockComponent;
   #rowDataA;
+  #rowDataB;
   #testStore;
 
   constructor() {
@@ -25,6 +26,18 @@ export class PerformanceTests {
     }
     this.#rowDataA = {
       "data": rows
+    }
+
+    const rowsB = [];
+    for(let i=0; i<100000; i++){
+      rowsB.push({
+        "fieldA": "test_"+i,
+        "fieldB": "second_"+i,
+        "id": i
+      });
+    }
+    this.#rowDataB = {
+      "data": rowsB
     }
   }
 
@@ -60,9 +73,12 @@ export class PerformanceTests {
     return "performance-tests";
   }
 
-  testStorePerformance_addLargeList() {    
+  testStorePerformance_addList() {    
 
+    const start = performance.now();
     this.#testStore.updateStoreData(this.#rowDataA);
+
+    const end = performance.now();
 
     const lastAdd = this.#mockComponent.getLastCallParams("addItems");
     
@@ -92,21 +108,41 @@ export class PerformanceTests {
       error = `Incorrect length`;
     }
 
+    let timeStr = '';
+    if((end-start)>0){
+      timeStr = `Run time is ${(end-start)} miliseconds`;
+    }
     assertResult({
-      message: isValid ? "" : error,
+      message: isValid ? timeStr : error,
       "isPass": isValid,
     });
+  }
+
+  testStorePerformance_largeList(){
+
+    const start = performance.now();
+    this.#testStore.updateStoreData(this.#rowDataB);
+
+    const end = performance.now();
+    const lastAdd = this.#mockComponent.getLastCallParams("addItems");
+ 
+    if(lastAdd[0].insertData.length !== 100000){
+      assertResult({
+        message:"Incorrect length",
+        "isPass":false
+      });
+    } else {
+      const runTime = end-start;
+      assertResult({
+        "message": `Run time is ${runTime} miliseconds`,
+        "isPass":true
+      });
+    }
+
   }
 
   testFillerTest() {
     assertResult({time: 22, isPass: false, message: "Test not implemented"});
   }
 
-  testFillerTest_Two(){
-    assertTrue(true);
-  }
-
-  testFillerTest_Three(){
-    assertEquals(1,1);
-  }
 }

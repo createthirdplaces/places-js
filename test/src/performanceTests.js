@@ -141,8 +141,4 @@ export class PerformanceTests {
 
   }
 
-  testFillerTest() {
-    assertResult({time: 22, isPass: false, message: "Test not implemented"});
-  }
-
 }

@@ -1,4 +1,6 @@
 export class ListUpdater {
+
+  #computedStateCache = new Map();
   #listFields = [];
 
   #prevOrdering = {};
@@ -101,7 +103,7 @@ export class ListUpdater {
 
       if (!this.#isReplace && !this.#isClear) {
         const arrayChanges = [];
-        const reactiveFields = this.#presentationSignals[field]["update"];
+        const reactiveFields = Object.keys(this.#presentationSignals[field]["update"]);
 
         for (let i = 0; i < storeUpdates[field].length; i++) {
           let oldStateRow = prevStoreData[field][i];
@@ -118,6 +120,7 @@ export class ListUpdater {
           }
 
           if (hasChanged) {
+            storeUpdates[field][i].prevStateIndex = i;
             arrayChanges.push(storeUpdates[field][i]);
           }
         }
@@ -301,8 +304,11 @@ export class ListUpdater {
       if (!updates.get(stateField)) {
         continue;
       }
-      if (!Array.isArray(update)) {
+
+
+      if (!Array.isArray(update) && !(typeof update ==="object")) {
         let changeData;
+
 
         if (typeof update === "function") {
           //TODO: Add check if state field is array.
@@ -346,13 +352,25 @@ export class ListUpdater {
               });
             }
           } else {
+            const prevIdx = updateData.prevStateIndex;
             Object.keys(reactiveFields).forEach((fieldName) => {
-              changeData.push({
-                id: id,
-                [fieldName]: reactiveFields[fieldName](
-                  updateData[`${reactiveFields[fieldName]}`],
-                ),
-              });
+
+               
+              //if(updateData[fieldName] === 
+              const newData = reactiveFields[fieldName](
+                updateData 
+              );
+              
+              const prevState = prevStoreData[stateField][prevIdx]
+
+              const oldData = reactiveFields[fieldName](prevState);
+
+              if(oldData !== newData){
+                changeData.push({
+                  id: id,
+                  [fieldName]: newData 
+                });
+              }
             });
           }
         }

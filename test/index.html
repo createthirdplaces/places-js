@@ -3,12 +3,14 @@
     <script type="module">
 
       import  {TestRunner} from '/lib/TestRunner.js';
+      import {ListUpdaterTests} from '/src/listUpdaterTests.js';
       import {PerformanceTests} from '/src/performanceTests.js';
       import {PresentationComponent} from '/lib/places-js-min.js'; 
 
       customElements.define('presentation-component',PresentationComponent);
  
       const tests = [
+        new ListUpdaterTests(),
         new PerformanceTests()
       ];
       
@@ -22,17 +24,20 @@
           TestRunner.createRunnerWithTests(test);
 
           testDOM.push(`
-            <presentation-component
-              data-store="${test.getName()}"  
-            >
-              <ul data-template>
-                <li>
-                  <h2> {name} </h2>
-                  <p>{message}</p>
-                  <p>{isPass}</p>
-                </li>
-              </ul>
-            </presentation-component>
+            <details open>
+              <summary>${test.constructor.name}</summary>
+              <presentation-component
+                data-store="${test.getName()}"  
+              >
+                <ul data-template>
+                  <li>
+                    <h2>{name}</h2>
+                    <p>{message}</p>
+                    <p>{isPass}</p>
+                  </li>
+                </ul>
+              </presentation-component>
+            </details>
           `);
         }
         document.getElementById("test-results")

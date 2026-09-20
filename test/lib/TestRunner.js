@@ -61,8 +61,8 @@ export class TestRunner {
 
   runAllTests() {
 
-    console.log("Running");
-    TestRunner.activeResults = new Map();
+    TestRunner.#activeResults = new Map();
+    
     for(let i=0;i<this.#tests.length;i++){
       const test = this.#tests[i];
       TestRunner.#activeTestName = test.testName;
@@ -71,7 +71,15 @@ export class TestRunner {
         this.#testConfig.beforeEach(); 
       }
 
-      test.testFunction();
+      try {
+        test.testFunction();
+      } catch (e){
+        console.log("Hi");
+        console.log(e.message);
+        TestRunner.saveResultToTest({
+          "message":e.message
+        })
+      }
 
       if(this.#testConfig.afterEach){
         this.#testConfig.afterEach(); 
@@ -83,9 +91,8 @@ export class TestRunner {
       resultArray.push({...value,id:key});
     });
 
-
     this.#resultStore.updateStoreData({"testResults":resultArray});
-    TestRunner.activeResults = new Map();
+    TestRunner.#activeResults = new Map();
   }
 }
 
@@ -93,16 +100,27 @@ export function assertResult(result){
   TestRunner.saveResultToTest(result);
 }
 
-export function assertTrue(result){
-  TestRunner.saveResultToTest({
-    pass:result
-  })
+export function assertTrue(result, message){
+
+  if(result){
+    TestRunner.saveResultToTest({
+      isPass:result
+    })
+  } else {
+  
+    throw new Error(message ?? "Not true");
+  }
+
 }
 
-export function assertEquals(first, second){
-  TestRunner.saveResultToTest({
-    pass: first === second
-  });
+export function assertEquals(first, second, message){
+  if(first === second){
+    TestRunner.saveResultToTest({
+      isPass: true
+    });
+  } else {
+    throw new Error(message ?? "Not equal");
+  }
 }
 
 

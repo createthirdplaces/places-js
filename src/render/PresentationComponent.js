@@ -164,7 +164,7 @@ export class PresentationComponent extends HTMLElement {
     this.#templateItem.setupChangeEventHandlers(this.#changeTemplateEvents);
   }
 
-  updateSingleItem(state) {
+  updateItem(state) {
     if (!this.#templateItem) {
       this.#setupTemplate();
     }
@@ -176,12 +176,7 @@ export class PresentationComponent extends HTMLElement {
       const signals = this.#templateItem.getAllSignals();
       for(let j=0;j<signals.length;j++){
 
-        const signalConfig = signals[j];
-        if (state[signalConfig.fieldName] === undefined) {
-          console.error(
-            `No state defined for template field ${signalConfig.fieldName}`,
-          );
-        }
+        const signalConfig = signals[j]; 
         this.#generateSignal({
           signalConfig: signalConfig,
           updateData: {
@@ -195,7 +190,6 @@ export class PresentationComponent extends HTMLElement {
       this.#templateItem.addNode(0, addNode);
       this.#templateItem.setSingleNode(addNode);
     } else {
-      const iter = this.#templateItem.getAllSignals();
 
       const signals = this.#templateItem.getAllSignals();
       for(let i=0;i<signals.length;i++){
@@ -247,7 +241,6 @@ export class PresentationComponent extends HTMLElement {
         }
         addFragment.appendChild(addNode);
       }
-
       if (insertBefore !== -1) {
         const lastNode = this.#templateItem.getNode(insertBefore);
         lastNode.parentNode.insertBefore(addFragment, lastNode);

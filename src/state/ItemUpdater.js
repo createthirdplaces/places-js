@@ -22,7 +22,7 @@ export class ItemUpdater {
 
     if (Object.keys(storeUpdates).length > 0) {
       for (let i = 0; i < subscribers.length; i++) {
-        subscribers[i].updateSingleItem(renderUpdates);
+        subscribers[i].updateItem(renderUpdates);
       }
     }
     return storeUpdates;

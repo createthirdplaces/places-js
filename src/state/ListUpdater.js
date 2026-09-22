@@ -126,7 +126,7 @@ export class ListUpdater {
         }
         changeData.set(field, arrayChanges);
       } else {
-        changeData[field] = storeUpdates[field];
+        changeData.set(field,storeUpdates[field]);
       }
     }
 
@@ -148,7 +148,7 @@ export class ListUpdater {
         subscribers[i].updateVisible(this.#updated);
       }
     }
-
+    
     return storeUpdates;
   }
 
@@ -277,6 +277,7 @@ export class ListUpdater {
   }
 
   #generatePresentationUpdates(updates, prevStoreData) {
+
     const presentationUpdates = {};
 
     const keys = Object.keys(this.#presentationSignals);
@@ -321,18 +322,14 @@ export class ListUpdater {
         }
 
         const dataToUpdate = prevStoreData[presentationField];
-
         if (Array.isArray(dataToUpdate)) {
+
+          presentationUpdates[presentationField] = [];
           for (let j = 0; j < changeData.length; j++) {
-            const id = changeData[j].id;
-            const updateVal = changeData[j].param;
-            if (!presentationUpdates[presentationField][id]) {
-              presentationUpdates[presentationField][id] = {};
+            if(changeData[j].id){
+              presentationUpdates[presentationField].push(changeData[j]);
             }
-            presentationUpdates[presentationField][id][presentationField] =
-              updateVal;
           }
-          presentationUpdates[presentationField] = changeData;
         } else {
           presentationUpdates[presentationField] = changeData["param"];
         }

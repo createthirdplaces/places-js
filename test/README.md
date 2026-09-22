@@ -4,5 +4,6 @@ code.
 
 ### Running unit tests ###
 
-- Run `npx http-server test 9999`
-- Navigate to `localhost: 9999`
+- Navigate to the root folder for this repo and run `npm run watch`
+- In another terminal window, run `npx http-server test 
+- Navigate to `localhost:808`

@@ -176,11 +176,20 @@ export class DataStore {
   }
 
   updateStoreData(storeUpdates) {
-    this.#storeData = this.#updater.updateStoreData(
+
+    const updates = this.#updater.updateStoreData(
       storeUpdates,
       this.#subscribers,
       this.#storeData || [],
     );
+
+    if(!this.#storeData){
+      this.#storeData = {};
+    }
+
+    Object.keys(updates).forEach((field)=>{
+      this.#storeData[field] = updates[field];
+    });
   }
 
   /**

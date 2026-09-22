@@ -202,7 +202,6 @@ export class TemplateItem {
 
     this.#changeTemplateEvents = [];
     this.#clickTemplateEvents = [];
-    const start = Date.now();
 
     this.#templateSignals = [];
 
@@ -370,6 +369,24 @@ export class TemplateItem {
     template.innerHTML = templateArr.join("");
     this.#templateNode = template.content.firstChild;
 
+    //Remove whitespace-only nodes to speed up rendering
+    const walker = document.createTreeWalker(
+        this.#templateNode,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+    );
+    const whitespaceNodes = [];
+    let textNode;
+    while ((textNode = walker.nextNode())) {
+        // Only remove text nodes that are pure whitespace
+        if (textNode.nodeValue && /^\s+$/.test(textNode.nodeValue)) {
+            whitespaceNodes.push(textNode);
+        }
+    }
+    for (let i = 0; i < whitespaceNodes.length; i++) {
+        whiteSpaceNodes[i].remove(); 
+    }
     const handlerAttrs = ["data-click-id", "data-change-id"];
 
     handlerAttrs.forEach((handlerAttr) => {
@@ -418,13 +435,6 @@ export class TemplateItem {
     }
 
     this.#initSignalMap();
-
-    //Tenplate parsing needs to be optimized for performance.
-    //This is to display the overhead of the current logic.
-    const parseTime = Date.now() - start;
-    if (parseTime > 0) {
-      console.warn(`Slow template parse time of ${parseTime} miliseconds`);
-    }
   }
 
   isAttributeChar(str) {

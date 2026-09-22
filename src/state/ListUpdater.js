@@ -103,15 +103,23 @@ export class ListUpdater {
 
       if (!this.#isReplace && !this.#isClear) {
         const arrayChanges = [];
-        const reactiveFields = Object.keys(this.#presentationSignals[field]["update"]);
 
+        const reactiveData = this.#presentationSignals[field]["update"];
+       
+        let reactiveFields;
+        if(!Array.isArray(reactiveData)){
+          reactiveFields = Object.keys(reactiveData);
+        } else {
+          reactiveFields = reactiveData;
+        }
+
+        console.log(reactiveFields);
         for (let i = 0; i < storeUpdates[field].length; i++) {
           let oldStateRow = prevStoreData[field][i];
 
           let hasChanged = false;
           for (let j = 0; j < reactiveFields.length; j++) {
             const reactiveName = reactiveFields[j];
-
             const oldState = oldStateRow[reactiveName];
             const newState = storeUpdates[field][i][reactiveName];
             if (oldState !== newState) {
@@ -131,7 +139,7 @@ export class ListUpdater {
     }
 
     //Look at storeUpdates if changeData is empty
-    if (changeData.size === 0) {
+    if (changeData.size === 0 && !this.#isReplace) {
       changeData = new Map();
       Object.keys(storeUpdates).forEach((key) => {
         if (!Array.isArray(storeUpdates[key])) {
@@ -139,7 +147,7 @@ export class ListUpdater {
         }
       });
     }
-    if (changeData.size > 0) {
+    if (changeData.size > 0 && !this.#isReplace) {
       this.#updated = this.#generatePresentationUpdates(
         changeData,
         prevStoreData,

@@ -12,6 +12,7 @@ export class TemplateItem {
   #templateRoot = null;
   #templateSignals;
   #signalMap = new Map();
+  #signalList;
 
   static #templateFunctions = new Map();
 
@@ -23,7 +24,7 @@ export class TemplateItem {
     this.#defineComponent(html);
   }
 
-  #initSignalMap() {
+  #initSignalMap() { 
     for (let i = 0; i < this.#templateSignals.length; i++) {
       this.#signalMap.set(
         this.#templateSignals[i].fieldName,
@@ -129,7 +130,7 @@ export class TemplateItem {
   }
 
   getAllSignals() {
-    return this.#signalMap.values();
+    return this.#templateSignals;
   }
 
   #evaluateConditional(templateStr) {
@@ -351,10 +352,17 @@ export class TemplateItem {
         if (token.templateAttrs.length > 0) {
           templateArr.push(token.startSection);
 
+          let hasText = false;
           for (let j = 0; j < token.templateAttrs.length; j++) {
+            if(token.templateAttrs[j].attr==="textcontent"){
+              hasText = true;
+            }
             templateArr.push(" " + token.templateAttrs[j].signalRef + " ");
           }
           templateArr.push(token.endSection);
+          if(hasText){
+            templateArr.push(" ");
+          }
         } else {
           templateArr.push(token.startSection + token.endSection);
         }
@@ -368,25 +376,7 @@ export class TemplateItem {
     let template = document.createElement("template");
     template.innerHTML = templateArr.join("");
     this.#templateNode = template.content.firstChild;
-
-    //Remove whitespace-only nodes to speed up rendering
-    const walker = document.createTreeWalker(
-        this.#templateNode,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-    );
-    const whitespaceNodes = [];
-    let textNode;
-    while ((textNode = walker.nextNode())) {
-        // Only remove text nodes that are pure whitespace
-        if (textNode.nodeValue && /^\s+$/.test(textNode.nodeValue)) {
-            whitespaceNodes.push(textNode);
-        }
-    }
-    for (let i = 0; i < whitespaceNodes.length; i++) {
-        whiteSpaceNodes[i].remove(); 
-    }
+ 
     const handlerAttrs = ["data-click-id", "data-change-id"];
 
     handlerAttrs.forEach((handlerAttr) => {

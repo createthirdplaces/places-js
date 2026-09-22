@@ -173,14 +173,10 @@ export class PresentationComponent extends HTMLElement {
 
     if (!node) {
       const addNode = templateNode.cloneNode(true);
-      const iter = this.#templateItem.getAllSignals();
-      while (true) {
-        const signalConfig = iter.next().value;
+      const signals = this.#templateItem.getAllSignals();
+      for(let j=0;j<signals.length;j++){
 
-        if (!signalConfig) {
-          break;
-        }
-
+        const signalConfig = signals[j];
         if (state[signalConfig.fieldName] === undefined) {
           console.error(
             `No state defined for template field ${signalConfig.fieldName}`,
@@ -200,13 +196,10 @@ export class PresentationComponent extends HTMLElement {
       this.#templateItem.setSingleNode(addNode);
     } else {
       const iter = this.#templateItem.getAllSignals();
-      while (true) {
-        const signalConfig = iter.next().value;
 
-        if (!signalConfig) {
-          break;
-        }
-
+      const signals = this.#templateItem.getAllSignals();
+      for(let i=0;i<signals.length;i++){
+        const signalConfig = signals[i];
         if (state[signalConfig.fieldName]) {
           this.#generateSignal({
             signalConfig: signalConfig,
@@ -229,6 +222,7 @@ export class PresentationComponent extends HTMLElement {
     }
 
     const templateNode = this.#templateItem.getTemplateNode();
+    const signals = this.#templateItem.getAllSignals();
 
     for (let j = 0; j < addFragments.length; j++) {
       const { insertBefore, insertData } = addFragments[j];
@@ -241,14 +235,8 @@ export class PresentationComponent extends HTMLElement {
         addNode.data_id = insertData[k].id;
         this.#templateItem.addNode(insertData[k].id, addNode);
 
-        while (true) {
-          const signalConfig = iter.next().value;
-
-          if (!signalConfig) {
-            break;
-          }
-
-          //if(insertData[k][signalConfig.fieldName]){
+        for(let a=0;a<signals.length;a++){ 
+          const signalConfig = signals[a];
           this.#generateSignal({
             signalConfig: signalConfig,
             updateData: {
@@ -256,7 +244,6 @@ export class PresentationComponent extends HTMLElement {
               elementRoot: addNode,
             },
           });
-          //}
         }
         addFragment.appendChild(addNode);
       }

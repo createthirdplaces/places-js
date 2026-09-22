@@ -113,7 +113,6 @@ export class ListUpdater {
           reactiveFields = reactiveData;
         }
 
-        console.log(reactiveFields);
         for (let i = 0; i < storeUpdates[field].length; i++) {
           let oldStateRow = prevStoreData[field][i];
 
@@ -225,6 +224,7 @@ export class ListUpdater {
         }
       }
 
+      prevStoreData[field] = updatedPrev;
       storeUpdates[field] = updatedPrev;
       this.#prevOrdering[field] = updatedOrdering;
       for (let i = 0; i < subscribers.length; i++) {

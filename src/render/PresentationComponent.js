@@ -78,6 +78,27 @@ export class PresentationComponent extends HTMLElement {
   setChangeEvents(events) {
     this.#changeTemplateEvents = events;
   }
+  
+  #generateAddSignal(params) {
+    const { fieldName, attr, signalId, signalPath } = params.signalConfig;
+
+    const { signalData, elementRoot } = params.updateData;
+
+    if (signalData[fieldName] === undefined) {
+      return;
+    }
+
+    let element = params.element;
+  
+    if (attr === "textcontent") {
+      element.innerText = signalData[fieldName];
+    }
+    else if (attr === "innerHTML") {
+      element.innerHTML = signalData[fieldName];
+    } else {
+      element.setAttribute(attr, `${signalData[fieldName]}`);
+    }
+  }
 
   #generateSignal(params) {
     const { fieldName, attr, signalId, signalPath } = params.signalConfig;
@@ -218,27 +239,52 @@ export class PresentationComponent extends HTMLElement {
     const templateNode = this.#templateItem.getTemplateNode();
     const signals = this.#templateItem.getAllSignals();
 
+    /*
+     *
+     *   let element = elementRoot;
+
+    if (signalPath) {
+      const cacheId = `${elementRoot.data_id}-${signalId}`;
+
+      if (!this.#selectorCache.has(cacheId)) {
+        element = element.querySelector(signalPath);
+        this.#selectorCache.set(cacheId, element);
+      } else {
+        element = this.#selectorCache.get(cacheId);
+      }
+     */
+    for(let sNum=0;sNum<signals.length;sNum++){
+      if(signals[sNum].signalPath){
+        signals[sNum].item = templateNode.querySelector(signals[sNum].signalPath);
+      } else {
+        signals[sNum].item = templateNode;
+      }
+    }
+
+
     for (let j = 0; j < addFragments.length; j++) {
       const { insertBefore, insertData } = addFragments[j];
       let addFragment = document.createDocumentFragment();
 
       for (let k = 0; k < insertData.length; k++) {
-        const addNode = templateNode.cloneNode(true);
         const iter = this.#templateItem.getAllSignals();
 
-        addNode.data_id = insertData[k].id;
-        this.#templateItem.addNode(insertData[k].id, addNode);
 
         for(let a=0;a<signals.length;a++){ 
           const signalConfig = signals[a];
-          this.#generateSignal({
+          this.#generateAddSignal({
             signalConfig: signalConfig,
             updateData: {
               signalData: insertData[k],
-              elementRoot: addNode,
+              elementRoot: templateNode,
             },
+            element: signals[a].item
           });
         }
+
+        const addNode = templateNode.cloneNode(true);
+        this.#templateItem.addNode(insertData[k].id, addNode);
+        addNode.data_id = insertData[k].id;
         addFragment.appendChild(addNode);
       }
       if (insertBefore !== -1) {

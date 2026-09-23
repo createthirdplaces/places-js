@@ -1,13 +1,17 @@
 Places.js is a HTML-first progressive enhancement framework. It has these key features.
 
 - No build step required. [Places.js can be directly downloaded from a CDN and immediately be used](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
-- HTML-first templating with fine-grained reactivity.
-- Cross-component state management using signals.
+- HTML-first templating with web components.
+- State management using signals for fine-grained reactivity.
 - Data fetching.
 
-Places.js is optimized for fast rendering. Performance benhmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
+The HTML-first templating provides flexibility for developers to chose how the HTML will be generated on a server. Developers can also dynamically add Places.js components with JavaScript.
+
+Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
 
 The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js) of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
+
+
 
 ## Getting started
 
@@ -130,7 +134,65 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 </search-component>
 ```
 
-###
+### Dynamically adding Places.js components with JavaScript.
+
+```
+<html>
+  <head>
+    <script type="module">
+
+      import {TestRunner} from '/lib/TestRunner.js';
+      import {ListUpdaterTests} from '/src/listUpdaterTests.js';
+      import {PerformanceTests} from '/src/performanceTests.js';
+      import {PresentationComponent} from '/lib/places-js-min.js'; 
+
+      customElements.define('presentation-component',PresentationComponent);
+ 
+      const tests = [
+        new ListUpdaterTests(),
+        new PerformanceTests()
+      ];
+      
+      window.addEventListener("load",()=>{
+
+        const testDOM = [];
+        for(let i=0; i<tests.length;i++){
+
+          const test = tests[i];
+          TestRunner.createRunnerWithTests(test);
+
+          testDOM.push(`
+            <details open>
+              <summary>${test.constructor.name}</summary>
+              <presentation-component data-store="${test.getName()}">
+                <ul data-template="testResults">
+                  <li>
+                    <h2>{name}</h2>
+                    <p>{message}</p>
+                    <p>{isPass}</p>
+                  </li>
+                </ul>
+              </presentation-component>
+            </details>
+          `);
+        }
+        document.getElementById("test-results")
+          .innerHTML = testDOM.join("\n");
+
+        document.getElementById("run-all")
+          .addEventListener("click",()=>{
+            TestRunner.runAllTests(); 
+        });
+      });  
+    </script>
+  </head>
+  <body>
+    <h1>Tests</h1>
+    <button id="run-all">Run all tests</button>
+    <div id="test-results"></div>
+  </body>
+</html>
+```
 
 ## Contributing
 

@@ -1,8 +1,16 @@
 {
+  "name": "@bponnaluri/places-js",
+  "version":"0.1.1-dev.1",
+  "author":"Bharat Ponnaluri",
   "type": "module",
   "watch": {
     "localDev": "{src/render,src/state}/*.js"
   },
+  "main": "dist/places-js.esm.js",
+  "module": "dist/places-js.esm.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "format": "npx prettier ./src . --write",

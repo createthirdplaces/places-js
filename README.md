@@ -11,7 +11,10 @@ The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel C
 
 ## Getting started
 
-Dwnload the [places-js-latest.js file from the jsDelivr CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+Download the [places-js-latest.js file from the jsDelivr
+CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+or run `npx jsr add @createthirdplaces/places-js`
+
 
 ## Examples
 

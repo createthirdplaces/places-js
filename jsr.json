@@ -3,5 +3,10 @@
   "version": "0.1.1-dev1",
   "license": "MIT",
   "exports": "./places-js.esm.js",
-  "include": "./places-js.esm.js"
+  "publish": {
+    "include": [
+      "places-js.esm.js",
+      "README.md"
+    ]
+  }
 }

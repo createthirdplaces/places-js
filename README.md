@@ -1,6 +1,6 @@
-Places.js is a framework for building HTML-first websites with progressive enhancements to provide interactivity. It has these key features.
+Places.js is a HTML-first progressive enhancement framework. It has these key features.
 
-- No build step required.
+- No build step required. [Places.js can be directly downloaded from a CDN and immediately be used](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 - HTML-first templating with fine-grained reactivity.
 - Cross-component state management using signals.
 - Data fetching.
@@ -11,7 +11,7 @@ The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel C
 
 ## Getting started
 
-To get started, download the [places-js-latest.js file](https://codeberg.org/createthirdplaces/places-js/src/branch/main/places-js-latest.js) from this repo or use the [CDN version](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+Dwnload the [places-js-latest.js file from the jsDelivr CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 
 ## Examples
 

@@ -1,21 +1,18 @@
 Places.js is a HTML-first progressive enhancement framework. It has these key features.
 
-- No build step required. [Places.js can be directly downloaded from a CDN and immediately be used](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
-- HTML-first templating with web components.
-- State management using signals for fine-grained reactivity.
-- Data fetching.
+- Dynamic compnents rendered with data from an API endpoint. 
+- Easy integration with existing projects through HTML-first templating with web components.
+- No build step [Places.js can be downloaded from a CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+- Support for partial re-rendering through using signals.
 
-The HTML-first templating provides flexibility for developers to chose how the HTML will be generated on a server. Developers can also dynamically add Places.js components with JavaScript.
-
-Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")
-
-The benchmarks were run using a Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. Benchmark code is from a [fork](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js) of the [krauset/js-framework-benchmark repo](https://github.com/krausest/js-framework-benchmark)
+To ensure quality, all code is written by hand and reviewed by a human without AI assistance. 
+Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")<sup>Run with a  Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. </sup><sup>[Benchmark code](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)</sup>
 
 
 
 ## Getting started
 
-Download the [places-js-latest.js file from the jsDelivr
+Download the places-js-latest.js file from the [jsDelivr
 CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 or run `npx jsr add @createthirdplaces/places-js`
 
@@ -198,11 +195,8 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 
 Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR.
 
-Also, places.js has a zero LLM use policy. In accordance with the policy, these rules should be followed:
+Also, all Places.js contributions must be make by humans,and be designed for humans which includes code changes, comments, or new issues. This means no use of ChatGPT, Claude, or any other AI tool.
 
-- All PRs and issues should be created without LLM assistance.
-- Comments on PRs or issues should be created without LLM assistance.
-- Skill files or other files used to support LLM use should not be added.
 
 ## Creating a minified build
 

@@ -6,7 +6,8 @@ Places.js is a HTML-first progressive enhancement framework. It has these key fe
 - Support for partial re-rendering through using signals.
 
 To ensure quality, all code is written by hand and reviewed by a human without AI assistance. 
-Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js outperforms React, Solid, and Svelte. ![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")<sup>Run with a  Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. </sup><sup>[Benchmark code](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)</sup>
+
+Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js optimized rendering outperforms React. vesta![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")<sup>Run with a  Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. </sup><sup>[Benchmark code](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)</sup>
 
 
 
@@ -59,8 +60,7 @@ const presentationSignals = {
     update: {
       recurringEventDays: (groupData) => {
         if (groupData.recurringEventDays.length > 0) {
-          return `
-<span class="group-search-details"><b>Days:</b> ${groupData.recurringEventDays.join(", ")}</span>`;
+          return `<span class="group-search-details"><b>Days:</b> ${groupData.recurringEventDays.join(", ")}</span>`;
         }
         return ``;
       },
@@ -77,13 +77,9 @@ const presentationSignals = {
     update: {
       eventTime: (eventData) => {
         if (eventData.isRecurring) {
-          return `
-            ${eventData.dayOfWeek}s at
-            ${eventData.nextEventTime}`;
+          return `${eventData.dayOfWeek}s at ${eventData.nextEventTime}`;
         }
-        return `
-          ${eventData.nextEventDate} at
-          ${eventData.nextEventTime}`;
+        return `${eventData.nextEventDate} at ${eventData.nextEventTime}`;
       },
       location: (eventData) => {
         return `${convertLocationDataForDisplay(eventData.eventLocation)}`;
@@ -100,8 +96,6 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
   presentationSignals: presentationSignals,
   storeName: "search-results-store",
 });
-
-
 ```
 
 ### Component with conditional statement to show a different UI and a [Handlebars partial](https://handlebarsjs.com/guide/partials.html)

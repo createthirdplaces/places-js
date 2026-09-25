@@ -1,4 +1,4 @@
-Places.js is a HTML-first progressive enhancement framework. It has these key features.
+Places.js is a HTML-first progressive enhancement framework with these features.
 
 - Dynamic compnents rendered with data from an API endpoint. 
 - Easy integration with existing projects through HTML-first templating with web components.
@@ -187,7 +187,13 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 
 ## Contributing
 
-Contributions to address bugs or optimize performance are welcome. If you are interested in contributing, create an issue first before starting work on a PR.
+Places.js is looking for help in the following areas.
+
+- Compatiblity with other tools. See [here](https://codeberg.org/createthirdplaces/places-js/issues?q=&type=all&sort=relevance&labels=2189466&state=open&milestone=0&project=0&assignee=0&poster=0) for libraries and frameworks that should be prioritized.
+- Documentation improvements.
+- Improving code quality and adressing bugs.
+- Performance optimization.
+
 
 Also, all Places.js contributions must be make by humans,and be designed for humans which includes code changes, comments, or new issues. This means no use of ChatGPT, Claude, or any other AI tool.
 

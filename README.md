@@ -2,7 +2,7 @@ Places.js is a HTML-first progressive enhancement framework with these features.
 
 - Dynamic compnents rendered with data from an API endpoint. 
 - Easy integration with existing projects through HTML-first templating with web components.
-- No build step [Places.js can be downloaded from a CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+- No build step. [Places.js can be downloaded from a CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
 - Support for partial re-rendering through using signals.
 
 To ensure quality, all code is written by hand and reviewed by a human without AI assistance. 

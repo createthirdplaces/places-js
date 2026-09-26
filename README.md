@@ -7,7 +7,7 @@ Places.js is a HTML-first progressive enhancement framework with these features.
 
 To ensure quality, all code is written by hand and reviewed by a human without AI assistance. 
 
-Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js optimized rendering outperforms React.![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/performanceTesting/PerformanceTestingResults.png "Performance benchmark results")<sup>Run with a  Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. </sup><sup>[Benchmark code](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)</sup>
+Places.js is optimized for fast rendering. Performance benchmarking shows that Places.js optimized rendering outperforms React.![Performance testing results](https://codeberg.org/createthirdplaces/places-js/src/branch/main/test/PerformanceTestingResults.png "Performance benchmark results")<sup>Run with a  Lenovo Legion Pro 5 16IRX8 82WK(13th Gen Intel Core i7-13700HX, 16GB RAM) with Linux Mint 22.1. </sup><sup>[Benchmark code](https://github.com/createthirdplaces/js-framework-benchmark/tree/master/frameworks/keyed/places-js)</sup>
 
 
 

@@ -1,3 +1,5 @@
 .idea/
 dist/
 node_modules/
+test/src/places-js-latest.js
+places-js.esm.js

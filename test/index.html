@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <script type="module">
+
+      import  {TestRunner} from '/lib/TestRunner.js';
+      import {ListUpdaterTests} from '/src/listUpdaterTests.js';
+      import {PerformanceTests} from '/src/performanceTests.js';
+      import {PresentationComponent} from '/lib/places-js-min.js'; 
+
+      customElements.define('presentation-component',PresentationComponent);
+ 
+      const tests = [
+        new ListUpdaterTests(),
+        new PerformanceTests()
+      ];
+      
+      window.addEventListener("load",()=>{
+
+        const testDOM = [];
+
+        for(let i=0; i<tests.length;i++){
+
+          const test = tests[i];
+          TestRunner.createRunnerWithTests(test);
+
+          testDOM.push(`
+            <details open>
+              <summary>${test.constructor.name}</summary>
+              <presentation-component
+                data-store="${test.getName()}"  
+              >
+                <ul data-template="testResults">
+                  <li>
+                    <h2>{name}</h2>
+                    <p>{message}</p>
+                    <p>{isPass}</p>
+                  </li>
+                </ul>
+              </presentation-component>
+            </details>
+          `);
+        }
+        document.getElementById("test-results")
+          .innerHTML = testDOM.join("\n");
+
+        document.getElementById("run-all")
+          .addEventListener("click",()=>{
+            TestRunner.runAllTests(); 
+        });
+      });
+      
+    </script>
+  </head>
+  <body>
+    <h1>Unit tests</h1>
+    <button id="run-all">Run all tests</button>
+    <div id="test-results">
+
+    </div>
+  </body>
+</html>
+

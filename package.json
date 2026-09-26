@@ -1,10 +1,26 @@
 {
-  "type":"module",
+  "name": "@bponnaluri/places-js",
+  "version":"0.1.1-dev.1",
+  "author":"Bharat Ponnaluri",
+  "type": "module",
+  "watch": {
+    "localDev": "{src/render,src/state}/*.js"
+  },
+  "main": "dist/places-js.esm.js",
+  "module": "dist/places-js.esm.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "updateLocal": "npm run build && yalc publish --push --replace"
+    "format": "npx prettier ./src . --write",
+    "lint": "eslint src",
+    "localDev": "npm run build && cp dist/places-js.esm.js ../js-framework-benchmark/frameworks/keyed/places-js/src/lib/places-js-latest.js",
+    "watch": "npm-watch"
   },
   "devDependencies": {
-    "rollup": "^4.46.3"
+    "eslint": "^9.39.5",
+    "npm-watch": "^0.13.0",
+    "rollup": "^4.63.3"
   }
 }

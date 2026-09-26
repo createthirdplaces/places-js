@@ -1,5 +1,5 @@
 /**
- * Class to determine a custom load action that includes a dependenccy on other stores
+ * Class to determine a custom load action that includes a dependency on other stores
  **/
 export class DataStoreSignal {
   constructor(stores) {

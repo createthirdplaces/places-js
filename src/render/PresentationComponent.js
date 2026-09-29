@@ -54,7 +54,7 @@ export class PresentationComponent extends HTMLElement {
         };
         this.startLoadingIndicator();
       }
-
+		
       const dataStore = DataStore.getStore(defaultStore);
       this.#subscribedStore = DataStore.getStore(defaultStore);
       dataStore.subscribeComponent(this, this.#loadingAnimationStart);
@@ -129,6 +129,7 @@ export class PresentationComponent extends HTMLElement {
       }
     }
 
+		console.log(element);
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
     }
@@ -179,7 +180,7 @@ export class PresentationComponent extends HTMLElement {
       return;
     }
 
-    templateNode.style.visibility = "initial";
+    templateNode.style.visibility = "inherit";
 
     let templateHTML = templateNode.innerHTML;
 
@@ -209,15 +210,16 @@ export class PresentationComponent extends HTMLElement {
 
     const node = this.#templateItem.getFirstNode();
     const templateNode = this.#templateItem.getTemplateNode();
-
 	
-
     if (!node) {
       const addNode = templateNode.cloneNode(true);
       const signals = this.#templateItem.getAllSignals();
-		
+	
       for(let j=0;j<signals.length;j++){
-
+				
+				if(this.nodeName === "PRESENTATION-COMPONENT"){
+					console.log(signals[j]);
+				}
         const signalConfig = signals[j]; 
         this.#generateSignal({
           signalConfig: signalConfig,

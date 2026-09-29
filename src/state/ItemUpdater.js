@@ -7,6 +7,10 @@ export class ItemUpdater {
     this.#topLevelUpdateFields = Object.keys(presentationSignals.update);
   }
 
+	updateWithState(subscriber, state){
+		subscriber.updateItem(state)
+	}
+
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
     let renderUpdates = {};
 

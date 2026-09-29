@@ -34,7 +34,7 @@ export class PresentationComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    const defaultStore = this.#subscribedStore || this.dataset["store"];
+    const defaultStore =  this.dataset["store"];
 
     if (defaultStore) {
       const loadingIndicatorComponent = this.dataset["loadingIndicator"];
@@ -64,6 +64,10 @@ export class PresentationComponent extends HTMLElement {
     if (this.querySelector("[data-template]")) {
       this.#setupTemplate();
     }
+
+		if(this.#subscribedStore){
+			this.#subscribedStore.subscribeComponent(this);	
+		}
   }
 
   init(initialState) {

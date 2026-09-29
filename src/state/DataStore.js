@@ -276,6 +276,7 @@ export class DataStore {
   }
 
   subscribeComponent(subscriber) {
+		this.#updater.updateWithState(subscriber,this.#storeData || {});
     let i = 0;
     while (i < this.#subscribers.length) {
       if (this.#subscribers[i] === subscriber) {
@@ -284,6 +285,7 @@ export class DataStore {
       }
       i++;
     }
+		
     this.#subscribers.push(subscriber);
   }
 }

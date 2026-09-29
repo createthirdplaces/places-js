@@ -22,6 +22,10 @@ export class ListUpdater {
     });
   }
 
+	updateWithState(subscriber, state){
+		subscriber.updateItem(state)
+	}
+
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
     let changeData = new Map();
 

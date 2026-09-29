@@ -15,7 +15,7 @@
     "build": "rollup -c rollup.config.js",
     "format": "npx prettier ./src . --write",
     "lint": "eslint src",
-    "localDev": "npm run build && cp dist/places-js.esm.js ../js-framework-benchmark/frameworks/keyed/places-js/src/lib/places-js-latest.js",
+    "localDev": "npm run build && cp dist/places-js.esm.js ../DMVBoardGames/src/lib/places-js-latest.js",
     "watch": "npm-watch"
   },
   "devDependencies": {

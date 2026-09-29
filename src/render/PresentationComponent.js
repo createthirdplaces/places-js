@@ -18,14 +18,13 @@ export class PresentationComponent extends HTMLElement {
   static clickHandlerCount = 0;
   static changeHandlerCount = 0;
 
-  /**
-   * @param dataStore The data store a component is subscribed to.
-   * @param loadingIndicatorConfig Configuration for the loading indicator
-   **/
-  constructor(dataStore) {
+  constructor() {
     super();
-    this.#subscribedStore = dataStore;
   }
+
+	setStore(store){
+		this.#subscribedStore = store;
+	}
 
   startLoadingIndicator() {
     this.#lightDomHTML = this.innerHTML;
@@ -35,7 +34,7 @@ export class PresentationComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    const defaultStore = this.dataset["store"];
+    const defaultStore = this.#subscribedStore || this.dataset["store"];
 
     if (defaultStore) {
       const loadingIndicatorComponent = this.dataset["loadingIndicator"];

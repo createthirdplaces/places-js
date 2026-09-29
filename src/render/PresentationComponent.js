@@ -66,6 +66,9 @@ export class PresentationComponent extends HTMLElement {
 			}
     }
 
+		if(!defaultStore && !this.#subscribedStore){
+			throw new Error(`${this.nodeName} must be subscribed to a store`);
+		}
 		if(!defaultStore){
 			this.#subscribedStore.subscribeComponent(this);	
 		}
@@ -161,9 +164,15 @@ export class PresentationComponent extends HTMLElement {
   }
 
   #setupTemplate() {
-
 	
     let templateNode = this.querySelector("[data-template]");
+
+		
+		if(!templateNode){
+			if(this.hasAttribute("data-template")){
+				templateNode = this;
+			}
+		}
 
     //Component does not have a temnplate
     if (!templateNode) {
@@ -190,6 +199,7 @@ export class PresentationComponent extends HTMLElement {
     this.#templateItem.setupClickEventHandlers(this.#clickTemplateEvents);
     this.#templateItem.setupChangeEventHandlers(this.#changeTemplateEvents);
   }
+
 
   updateItem(state) {
 
@@ -219,7 +229,6 @@ export class PresentationComponent extends HTMLElement {
       }
       //TODO: Refactor. Having addNode and appendNode can
       // be confusing.
-			
 			
       this.#templateItem.addNode(0, addNode);
 			this.#templateItem.setSingleNode(addNode,this);

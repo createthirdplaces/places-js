@@ -456,6 +456,10 @@ export class TemplateItem {
   //TOOD: Fix bug related to this.#templateNode no longer being valid.
   setSingleNode(node, elem) {
     this.#templateNode = elem.querySelector("[data-template]");
+
+		if(this.#templateNode === null){
+			this.#templateNode = elem;
+		}
     this.#templateNode.replaceChildren(node);
   }
 

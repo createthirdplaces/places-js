@@ -30,12 +30,15 @@ export class DataStore {
   #prevOrdering = {};
   #requestStoreId;
   #storeData = null;
+	#storeName;
   #subscribers = [];
+	#updateCallbacks = [];
 
   #updater;
 
   constructor(loadAction, storeName, updater = new DefaultUpdater()) {
 
+		this.#storeName = storeName;
     this.#subscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
 
@@ -190,6 +193,11 @@ export class DataStore {
     Object.keys(updates).forEach((field)=>{
       this.#storeData[field] = updates[field];
     });
+
+
+		for(let i=0; i < this.#updateCallbacks.length; i++){
+			this.#updateCallbacks[i](this.#storeData);
+		}
   }
 
   /**
@@ -274,6 +282,14 @@ export class DataStore {
   unsubscribeComponent(subscriber) {
     this.#subscribers.splice(this.#subscribers.indexOf(subscriber), 1);
   }
+
+	/**
+	 * Subscribe with custom callback function. This can be used to subscribe external 
+	   components to a Places.js store
+	 **/
+	subscribeWithCallback(callback){
+		this.#updateCallbacks.push(callback);
+	}
 
   subscribeComponent(subscriber, loadingIndicatorStart) {
 	

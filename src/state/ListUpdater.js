@@ -23,7 +23,7 @@ export class ListUpdater {
   }
 
 	updateWithState(subscriber, state){
-		subscriber.updateItem(state)
+		subscriber.addItems(state)
 	}
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {

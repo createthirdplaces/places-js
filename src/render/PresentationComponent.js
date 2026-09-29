@@ -57,15 +57,16 @@ export class PresentationComponent extends HTMLElement {
 
       const dataStore = DataStore.getStore(defaultStore);
       this.#subscribedStore = DataStore.getStore(defaultStore);
-
-      dataStore.subscribeComponent(this);
+      dataStore.subscribeComponent(this, this.#loadingAnimationStart);
     }
 
     if (this.querySelector("[data-template]")) {
-      this.#setupTemplate();
+			if(!this.#templateItem){
+				this.#setupTemplate();
+			}
     }
 
-		if(this.#subscribedStore){
+		if(!defaultStore){
 			this.#subscribedStore.subscribeComponent(this);	
 		}
   }
@@ -160,6 +161,8 @@ export class PresentationComponent extends HTMLElement {
   }
 
   #setupTemplate() {
+
+		
     let templateNode = this.querySelector("[data-template]");
 
     //Component does not have a temnplate
@@ -189,6 +192,7 @@ export class PresentationComponent extends HTMLElement {
   }
 
   updateItem(state) {
+
     if (!this.#templateItem) {
       this.#setupTemplate();
     }
@@ -228,8 +232,8 @@ export class PresentationComponent extends HTMLElement {
           });
         }
       }
-    }
-  }
+		} 
+	}
 
   async addItems(addFragments) {
     if (this.#loadingAnimationStart) {
@@ -242,20 +246,7 @@ export class PresentationComponent extends HTMLElement {
     const templateNode = this.#templateItem.getTemplateNode();
     const signals = this.#templateItem.getAllSignals();
 
-    /*
-     *
-     *   let element = elementRoot;
-
-    if (signalPath) {
-      const cacheId = `${elementRoot.data_id}-${signalId}`;
-
-      if (!this.#selectorCache.has(cacheId)) {
-        element = element.querySelector(signalPath);
-        this.#selectorCache.set(cacheId, element);
-      } else {
-        element = this.#selectorCache.get(cacheId);
-      }
-     */
+  
     for(let sNum=0;sNum<signals.length;sNum++){
       if(signals[sNum].signalPath){
         signals[sNum].item = templateNode.querySelector(signals[sNum].signalPath);

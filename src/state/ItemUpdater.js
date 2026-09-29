@@ -8,6 +8,7 @@ export class ItemUpdater {
   }
 
 	updateWithState(subscriber, state){
+		console.log(subscriber.nodeName);	
 		subscriber.updateItem(state)
 	}
 

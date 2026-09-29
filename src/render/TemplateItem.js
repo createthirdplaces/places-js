@@ -378,9 +378,10 @@ export class TemplateItem {
     this.#templateNode = template.content.firstChild;
  
     const handlerAttrs = ["data-click-id", "data-change-id"];
-
+		
     handlerAttrs.forEach((handlerAttr) => {
       const attrSelector = `[${handlerAttr}]`;
+
 
       this.#templateNode.querySelectorAll(attrSelector).forEach((node) => {
         const clickNum = node.attributes[handlerAttr].value;

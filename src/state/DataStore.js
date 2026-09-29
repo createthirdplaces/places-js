@@ -275,8 +275,12 @@ export class DataStore {
     this.#subscribers.splice(this.#subscribers.indexOf(subscriber), 1);
   }
 
-  subscribeComponent(subscriber) {
-		this.#updater.updateWithState(subscriber,this.#storeData || {});
+  subscribeComponent(subscriber, loadingIndicatorStart) {
+	
+	
+		if(!loadingIndicatorStart){
+			this.#updater.updateWithState(subscriber,this.#storeData || {});
+		}
     let i = 0;
     while (i < this.#subscribers.length) {
       if (this.#subscribers[i] === subscriber) {

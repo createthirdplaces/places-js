@@ -454,8 +454,8 @@ export class TemplateItem {
   }
 
   //TOOD: Fix bug related to this.#templateNode no longer being valid.
-  setSingleNode(node) {
-    this.#templateNode = document.querySelector("[data-template]");
+  setSingleNode(node, elem) {
+    this.#templateNode = elem.querySelector("[data-template]");
     this.#templateNode.replaceChildren(node);
   }
 

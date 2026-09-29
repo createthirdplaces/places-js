@@ -162,7 +162,7 @@ export class PresentationComponent extends HTMLElement {
 
   #setupTemplate() {
 
-		
+	
     let templateNode = this.querySelector("[data-template]");
 
     //Component does not have a temnplate
@@ -196,12 +196,16 @@ export class PresentationComponent extends HTMLElement {
     if (!this.#templateItem) {
       this.#setupTemplate();
     }
+
     const node = this.#templateItem.getFirstNode();
     const templateNode = this.#templateItem.getTemplateNode();
+
+	
 
     if (!node) {
       const addNode = templateNode.cloneNode(true);
       const signals = this.#templateItem.getAllSignals();
+		
       for(let j=0;j<signals.length;j++){
 
         const signalConfig = signals[j]; 
@@ -215,8 +219,10 @@ export class PresentationComponent extends HTMLElement {
       }
       //TODO: Refactor. Having addNode and appendNode can
       // be confusing.
+			
+			
       this.#templateItem.addNode(0, addNode);
-      this.#templateItem.setSingleNode(addNode);
+			this.#templateItem.setSingleNode(addNode,this);
     } else {
 
       const signals = this.#templateItem.getAllSignals();

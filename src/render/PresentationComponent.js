@@ -118,18 +118,18 @@ export class PresentationComponent extends HTMLElement {
 
     let element = elementRoot;
 
-    if (signalPath) {
+		if (signalPath) {
       const cacheId = `${elementRoot.data_id}-${signalId}`;
 
       if (!this.#selectorCache.has(cacheId)) {
+
         element = element.querySelector(signalPath);
         this.#selectorCache.set(cacheId, element);
       } else {
         element = this.#selectorCache.get(cacheId);
       }
     }
-
-		console.log(element);
+		
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
     }
@@ -216,10 +216,7 @@ export class PresentationComponent extends HTMLElement {
       const signals = this.#templateItem.getAllSignals();
 	
       for(let j=0;j<signals.length;j++){
-				
-				if(this.nodeName === "PRESENTATION-COMPONENT"){
-					console.log(signals[j]);
-				}
+					
         const signalConfig = signals[j]; 
         this.#generateSignal({
           signalConfig: signalConfig,

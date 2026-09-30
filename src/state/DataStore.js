@@ -21,17 +21,21 @@ export class DataStore {
   static #storeCount = 0;
   static #storeNameMap = new Map();
 
-  #fieldTypeMapping = {};
+	#dataStoreSubscribers = new Map();
+
+	#fieldTypeMapping = {};
   #isLoading = false;
   #loadAction;
 
+
   #presentationUpdates = {};
   #presentationSignals = {};
+  #presentationSubscribers = [];
+
   #prevOrdering = {};
   #requestStoreId;
   #storeData = null;
 	#storeName;
-  #subscribers = [];
 	#updateCallbacks = [];
 
   #updater;
@@ -39,7 +43,7 @@ export class DataStore {
   constructor(loadAction, storeName, updater = new DefaultUpdater()) {
 
 		this.#storeName = storeName;
-    this.#subscribers = [];
+    this.#presentationSubscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
 
     this.#updater = updater;
@@ -111,6 +115,7 @@ export class DataStore {
       throw new Error("storeSignals is undefined");
     }
 
+		let dataStore;
     if (presentationSignals) {
       let isArray = false;
       Object.keys(presentationSignals).forEach((key) => {
@@ -120,20 +125,27 @@ export class DataStore {
       });
 
       if (isArray) {
-        return new DataStore(
+        dataStore =  new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
           new ListUpdater(presentationSignals),
         );
       } else {
-        return new DataStore(
+				dataStore = new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
           new ItemUpdater(presentationSignals),
         );
       }
-    }
-    return new DataStore(new DataStoreSignal(storeSignals), storeName);
+    } else {
+			dataStore = new DataStore(new DataStoreSignal(storeSignals), storeName);
+		}
+
+		
+		for(let i =0; i < storeSignals.length; i++){
+			storeSignals[i].store.subscribeDataStore(dataStore, storeSignals[i].fieldName);
+		}
+		return dataStore;
   }
 
   static createWithCustomLoadSignal({loadAction, storeName,presentationSignals}) {
@@ -182,7 +194,7 @@ export class DataStore {
 
     const updates = this.#updater.updateStoreData(
       storeUpdates,
-      this.#subscribers,
+      this.#presentationSubscribers,
       this.#storeData || [],
     );
 
@@ -212,7 +224,7 @@ export class DataStore {
   }
 
   getSubscribedComponents() {
-    return this.#subscribers;
+    return this.#presentationSubscribers;
   }
 
   /**
@@ -247,11 +259,11 @@ export class DataStore {
 
       // Make an API call if a cached response does not exist.
       if (response === null) {
-        //Replace component with loading indicator if one exists.
 
         if (dataStore) {
           const dataStoreSubscribedComponents =
             dataStore.getSubscribedComponents();
+					//TODO: This should be removed. Locking component is no longer necessary.
           for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
             dataStoreSubscribedComponents[i].lockComponent(dataStore);
           }
@@ -270,17 +282,29 @@ export class DataStore {
       if (dataStore) {
         const dataStoreSubscribedComponents =
           dataStore.getSubscribedComponents();
+				//TODO: This should be removed. Locking components should be done with a loading overlay
+				//that is decoupled from DataStore.js
         for (let i = 0; i < dataStoreSubscribedComponents.length; i++) {
           dataStoreSubscribedComponents[i].unlockComponent(dataStore);
         }
         dataStore.updateStoreData(response);
       }
+
+			if(this.#dataStoreSubscribers){
+				this.#dataStoreSubscribers.forEach((fieldName, subscriber)=>{
+					subscriber.updateStoreData({
+						[fieldName]: response
+					});
+				});
+			}
+			
+			
       return response;
     }
   }
 
   unsubscribeComponent(subscriber) {
-    this.#subscribers.splice(this.#subscribers.indexOf(subscriber), 1);
+    this.#presentationSubscribers.splice(this.#presentationSubscribers.indexOf(subscriber), 1);
   }
 
 	/**
@@ -291,21 +315,23 @@ export class DataStore {
 		this.#updateCallbacks.push(callback);
 	}
 
-  subscribeComponent(subscriber, loadingIndicatorStart) {
-	
-	
+	subscribeDataStore(dataStore,fieldName){
+		this.#dataStoreSubscribers.set(dataStore, fieldName);
+	}
+
+  subscribeComponent(subscriber, loadingIndicatorStart) {	
 		if(!loadingIndicatorStart){
 			this.#updater.updateWithState(subscriber,this.#storeData || {});
 		}
     let i = 0;
-    while (i < this.#subscribers.length) {
-      if (this.#subscribers[i] === subscriber) {
-        this.#subscribers = this.#subscribers.splice(i, 1);
+    while (i < this.#presentationSubscribers.length) {
+      if (this.#presentationSubscribers[i] === subscriber) {
+        this.#presentationSubscribers = this.#presentationSubscribers.splice(i, 1);
         break;
       }
       i++;
     }
 		
-    this.#subscribers.push(subscriber);
+    this.#presentationSubscribers.push(subscriber);
   }
 }

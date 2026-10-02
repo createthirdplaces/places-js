@@ -54,8 +54,11 @@ export class PresentationComponent extends HTMLElement {
         };
         this.startLoadingIndicator();
       }
-		
+	
       const dataStore = DataStore.getStore(defaultStore);
+      if(!dataStore){
+        console.error(`No store defined with name ${defaultStore}`);
+      }
       this.#subscribedStore = DataStore.getStore(defaultStore);
       dataStore.subscribeComponent(this, this.#loadingAnimationStart);
     }

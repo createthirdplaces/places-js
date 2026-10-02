@@ -22,6 +22,7 @@ export class DataStore {
   static #storeNameMap = new Map();
 
 	#dataStoreSubscribers = new Map();
+  #dataStoreSubscriberSelectors = new Map();
 
 	#fieldTypeMapping = {};
   #isLoading = false;
@@ -141,9 +142,8 @@ export class DataStore {
 			dataStore = new DataStore(new DataStoreSignal(storeSignals), storeName);
 		}
 
-		
 		for(let i =0; i < storeSignals.length; i++){
-			storeSignals[i].store.subscribeDataStore(dataStore, storeSignals[i].fieldName);
+			storeSignals[i].store.subscribeDataStore(dataStore, storeSignals[i].fieldName,storeSignals[i].selector);
 		}
 		return dataStore;
   }
@@ -292,9 +292,18 @@ export class DataStore {
 
 			if(this.#dataStoreSubscribers){
 				this.#dataStoreSubscribers.forEach((fieldName, subscriber)=>{
-					subscriber.updateStoreData({
-						[fieldName]: response
-					});
+
+          const selector = this.#dataStoreSubscriberSelectors.get(subscriber);
+          if(selector){
+            response = selector(response);
+          }
+          if(fieldName){
+            subscriber.updateStoreData({
+              [fieldName]: response
+            });
+          } else {
+            subscriber.updateStoreData(response);
+          }
 				});
 			}
 			
@@ -315,8 +324,9 @@ export class DataStore {
 		this.#updateCallbacks.push(callback);
 	}
 
-	subscribeDataStore(dataStore,fieldName){
+	subscribeDataStore(dataStore,fieldName,selector){
 		this.#dataStoreSubscribers.set(dataStore, fieldName);
+    this.#dataStoreSubscriberSelectors.set(dataStore,selector)
 	}
 
   subscribeComponent(subscriber, loadingIndicatorStart) {	

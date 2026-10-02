@@ -1,5 +1,4 @@
 export { PresentationComponent } from "./render/PresentationComponent.js";
-export { ShadowDOMComponent } from "./render/ShadowDOMComponent.js";
 export { StaticComponent } from "./render/StaticComponent.js";
 export { TemplateItem } from "./render/TemplateItem.js";
 

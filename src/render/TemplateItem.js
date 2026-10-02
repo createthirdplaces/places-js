@@ -376,7 +376,8 @@ export class TemplateItem {
     let template = document.createElement("template");
     template.innerHTML = templateArr.join("");
     this.#templateNode = template.content.firstChild;
- 
+
+    console.log(template.innerHTML);
     const handlerAttrs = ["data-click-id", "data-change-id"];
 		
     handlerAttrs.forEach((handlerAttr) => {
@@ -410,6 +411,8 @@ export class TemplateItem {
         let node = template.content.querySelector(selector);
         let searchNode = node;
 
+        console.log("Starting node:");
+        console.log(searchNode);
         while (searchNode.parentNode.nodeName !== "#document-fragment") {
           for (let j = 0; j < searchNode.parentNode.childNodes.length; j++) {
             if (Object.is(searchNode.parentNode.childNodes[j], searchNode)) {
@@ -417,6 +420,11 @@ export class TemplateItem {
             }
           }
           searchNode = searchNode.parentNode;
+        }
+
+        if(templateStr.includes("form")){
+          console.log(childNodePath);
+          console.log(template.innerHTML);
         }
 
         childNodePath = childNodePath.reverse();

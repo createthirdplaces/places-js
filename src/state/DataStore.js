@@ -15,6 +15,8 @@ class DefaultUpdater {
     }
     return storeUpdates;
   }
+  
+ 
 }
 
 export class DataStore {
@@ -28,6 +30,7 @@ export class DataStore {
   #isLoading = false;
   #loadAction;
 
+  #pendingFetch;
 
   #presentationUpdates = {};
   #presentationSignals = {};
@@ -39,7 +42,7 @@ export class DataStore {
 	#storeName;
 	#updateCallbacks = [];
 
-  #updater;
+  #presentationUpdater;
 
   constructor(loadAction, storeName, updater = new DefaultUpdater()) {
 
@@ -47,7 +50,7 @@ export class DataStore {
     this.#presentationSubscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
 
-    this.#updater = updater;
+    this.#presentationUpdater = updater;
 
     sessionStorage.setItem(this.#requestStoreId, JSON.stringify({}));
 
@@ -192,12 +195,14 @@ export class DataStore {
 
   updateStoreData(storeUpdates) {
 
-    
-    const updates = this.#updater.updateStoreData(
-      storeUpdates,
-      this.#presentationSubscribers,
-      this.#storeData || [],
-    );
+    let updates = storeUpdates;
+    if(this.#presentationSubscribers.length >0){
+      updates = this.#presentationUpdater.updateStoreData(
+        storeUpdates,
+        this.#presentationSubscribers,
+        this.#storeData || [],
+      );
+    }
 
     if(!this.#storeData){
       this.#storeData = {};
@@ -269,11 +274,18 @@ export class DataStore {
             dataStoreSubscribedComponents[i].lockComponent(dataStore);
           }
         }
-        response = await this.#loadAction.fetch(
-          params,
-          this.#requestStoreId,
-          requestKey,
-        );
+
+        const self = this;
+        this.#pendingFetch = new Promise(async(resolve,reject)=>{
+          const response = await this.#loadAction.fetch(
+            params,
+            this.#requestStoreId,
+            requestKey,
+          );
+          resolve(response);
+        });
+        
+        response = await this.#pendingFetch;
       }
 
       this.updateStoreData(response);
@@ -315,6 +327,10 @@ export class DataStore {
 			
       return response;
     }
+
+
+    const data = await Promise.resolve(this.#pendingFetch);
+    return data; 
   }
 
   unsubscribeComponent(subscriber) {
@@ -335,8 +351,8 @@ export class DataStore {
 	}
 
   subscribeComponent(subscriber, loadingIndicatorStart) {	
-		if(!loadingIndicatorStart){
-			this.#updater.updateWithState(subscriber,this.#storeData || {});
+    if(!loadingIndicatorStart && this.#presentationSubscribers.length >0){
+			this.#presentationUpdater.updateWithState(subscriber,this.#storeData || {});
 		}
     let i = 0;
     while (i < this.#presentationSubscribers.length) {

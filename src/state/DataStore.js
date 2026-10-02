@@ -302,7 +302,7 @@ export class DataStore {
               [fieldName]: response
             });
           } else {
-            subscriber.updateStoreData(response);
+            subscriber.updateStoreData(structuredClone(response));
           }
 				});
 			}

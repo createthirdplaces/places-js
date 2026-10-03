@@ -380,9 +380,9 @@ export class TemplateItem {
     let template = document.createElement("template");
 
     const htmlToAdd = templateArr.join("");
+ 
     template.innerHTML = htmlToAdd;
     this.#templateNode = template.content.firstChild;
- 
     const handlerAttrs = ["data-click-id", "data-change-id"];
 		
     handlerAttrs.forEach((handlerAttr) => {
@@ -424,8 +424,7 @@ export class TemplateItem {
           searchNode = searchNode.parentNode;
         }
 
-        if(templateStr.includes("form")){
-        }
+        childNodePath.push(":nth-child(1)");
 
         childNodePath = childNodePath.reverse();
         node.attributes.removeNamedItem(signal.signalPath);

@@ -57,7 +57,7 @@ export class PresentationComponent extends HTMLElement {
 	
       const dataStore = DataStore.getStore(defaultStore);
       if(!dataStore){
-        console.error(`No store defined with name ${defaultStore}`);
+        console.error(`No defined store with name ${defaultStore}`);
       }
       this.#subscribedStore = DataStore.getStore(defaultStore);
       dataStore.subscribeComponent(this, this.#loadingAnimationStart);
@@ -106,6 +106,10 @@ export class PresentationComponent extends HTMLElement {
     else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];
     } else {
+
+      if(element === null){
+        console.log("Null");
+      }
       element.setAttribute(attr, `${signalData[fieldName]}`);
     }
   }
@@ -119,38 +123,39 @@ export class PresentationComponent extends HTMLElement {
       return;
     }
 
-    let element = elementRoot;
-
+    //let element = elementRoot;
+    
+    let element;
 		if (signalPath) {
       const cacheId = `${elementRoot.data_id}-${signalId}`;
 
-      if ( !this.#selectorCache.has(cacheId)) {
+      if (!this.#selectorCache.has(cacheId)) {
 
-        element = element.querySelector(signalPath);
+        element = elementRoot.querySelector(signalPath);
+
         this.#selectorCache.set(cacheId, element);
       } else {
         element = this.#selectorCache.get(cacheId);
       }
     }
-
-    if(this.nodeName === "EDIT-PROFILE-COMPONENT"){
-      
-      console.log("Element root:");
-      console.log(elementRoot);
-      console.log("Element:");
-      console.log(element);
+    else {
+      element = elementRoot;
     }
+
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
     }
     else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];
     } else {
-      if(element === null){
+
+      //Code is temporarily here for debugging.
+      if(element === null || element === undefined){
+        console.log("Null element");
         console.log(this.nodeName);
         console.log(fieldName);
         console.log(elementRoot.innerHTML);
-        console.log(attr);
+        console.log(signalPath);
       }
       element.setAttribute(attr, `${signalData[fieldName]}`);
     }
@@ -233,11 +238,6 @@ export class PresentationComponent extends HTMLElement {
       const signals = this.#templateItem.getAllSignals();
 	
       for(let j=0;j<signals.length;j++){
-		
-        if(this.nodeName === "EDIT-PROFILE-COMPONENT"){
-          console.log(signals[j]);
-          console.log(addNode.innerHTML);
-        }
 
         const signalConfig = signals[j]; 
         this.#generateSignal({

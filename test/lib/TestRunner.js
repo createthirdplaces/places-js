@@ -102,8 +102,6 @@ export class TestRunner {
       try {
         test.testFunction();
       } catch (e){
-        console.log("Hi");
-        console.log(e.message);
         TestRunner.saveResultToTest({
           "message":e.message
         })
@@ -147,7 +145,7 @@ export function assertEquals(first, second, message){
       isPass: true
     });
   } else {
-    throw new Error(message ?? "Not equal");
+    throw new Error(message ?? `${first}\n${second}`);
   }
 }
 

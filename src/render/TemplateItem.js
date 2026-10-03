@@ -33,6 +33,10 @@ export class TemplateItem {
     }
   }
 
+  getEventHandlerCount() {
+    return this.#clickTemplateEvents.length + this.#changeTemplateEvents.length;
+  }
+
   setupChangeEventHandlers(events) {
     if (events) {
       this.#changeTemplateHandlers = events;
@@ -374,15 +378,15 @@ export class TemplateItem {
     }
 
     let template = document.createElement("template");
-    template.innerHTML = templateArr.join("");
-    this.#templateNode = template.content.firstChild;
 
-    console.log(template.innerHTML);
+    const htmlToAdd = templateArr.join("");
+    template.innerHTML = htmlToAdd;
+    this.#templateNode = template.content.firstChild;
+ 
     const handlerAttrs = ["data-click-id", "data-change-id"];
 		
     handlerAttrs.forEach((handlerAttr) => {
       const attrSelector = `[${handlerAttr}]`;
-
 
       this.#templateNode.querySelectorAll(attrSelector).forEach((node) => {
         const clickNum = node.attributes[handlerAttr].value;
@@ -411,8 +415,6 @@ export class TemplateItem {
         let node = template.content.querySelector(selector);
         let searchNode = node;
 
-        console.log("Starting node:");
-        console.log(searchNode);
         while (searchNode.parentNode.nodeName !== "#document-fragment") {
           for (let j = 0; j < searchNode.parentNode.childNodes.length; j++) {
             if (Object.is(searchNode.parentNode.childNodes[j], searchNode)) {
@@ -423,8 +425,6 @@ export class TemplateItem {
         }
 
         if(templateStr.includes("form")){
-          console.log(childNodePath);
-          console.log(template.innerHTML);
         }
 
         childNodePath = childNodePath.reverse();

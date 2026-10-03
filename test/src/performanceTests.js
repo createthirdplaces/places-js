@@ -69,6 +69,7 @@ export class PerformanceTests {
     DataStore.clearStores();
   }
 
+
   getName(){
     return "performance-tests";
   }

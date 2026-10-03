@@ -30,7 +30,6 @@ export class TestRunner {
     for(let i=1;i<split.length;i++){
 
       if(split[i] === "_"){
-        console.log("Hi");
         charData.push(": ");
       } else {
         if(split[i].toUpperCase() === split[i]){

@@ -5,13 +5,16 @@
       import  {TestRunner} from '/lib/TestRunner.js';
       import {ListUpdaterTests} from '/src/listUpdaterTests.js';
       import {PerformanceTests} from '/src/performanceTests.js';
+      import {TemplateTests} from '/src/templateTests.js';
+
       import {PresentationComponent} from '/lib/places-js-min.js'; 
 
       customElements.define('presentation-component',PresentationComponent);
  
       const tests = [
         new ListUpdaterTests(),
-        new PerformanceTests()
+        new PerformanceTests(),
+        new TemplateTests()
       ];
       
       window.addEventListener("load",()=>{

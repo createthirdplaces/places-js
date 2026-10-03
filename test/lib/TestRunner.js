@@ -21,10 +21,39 @@ export class TestRunner {
     this.#tests = tests;
   }
 
+  static #convertTestFunctionNameForDisplay(name){
+    const split = name.split("test")[1].split('');
+    
+    const charData = [];
+
+    charData.push(split[0].toUpperCase());
+    for(let i=1;i<split.length;i++){
+
+      if(split[i] === "_"){
+        console.log("Hi");
+        charData.push(": ");
+      } else {
+        if(split[i].toUpperCase() === split[i]){
+          charData.push(" ");
+          charData.push(split[i]);
+        }
+        else if(i>0 && split[i-1] === "_") {
+          charData.push(split[i].toUpperCase());
+        }
+        else{
+          charData.push(split[i]);
+        }
+
+      }
+      
+    }
+    return charData.join("");
+  }
+
   static createRunnerWithTests(testConfig){
 
     const tests = [];
-
+    
     const testNames = Object
       .getOwnPropertyNames(Object.getPrototypeOf(testConfig))
       .filter((name)=>{
@@ -35,7 +64,7 @@ export class TestRunner {
     for(let i=0; i< testNames.length; i++){
       tests.push({
         "id": testNames[i],
-        "testName":testNames[i],
+        "testName":TestRunner.#convertTestFunctionNameForDisplay(testNames[i]),
         "testFunction":testConfig[testNames[i]].bind(testConfig)
       });
     }

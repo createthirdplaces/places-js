@@ -123,8 +123,6 @@ export class PresentationComponent extends HTMLElement {
       return;
     }
 
-    //let element = elementRoot;
-    
     let element;
 		if (signalPath) {
       const cacheId = `${elementRoot.data_id}-${signalId}`;
@@ -152,10 +150,10 @@ export class PresentationComponent extends HTMLElement {
       //Code is temporarily here for debugging.
       if(element === null || element === undefined){
         console.log("Null element");
-        console.log(this.nodeName);
         console.log(fieldName);
-        console.log(elementRoot.innerHTML);
+        console.log("Element root html:"+elementRoot.innerHTML);
         console.log(signalPath);
+        console.log(attr);
       }
       element.setAttribute(attr, `${signalData[fieldName]}`);
     }

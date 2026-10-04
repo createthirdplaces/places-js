@@ -92,6 +92,7 @@ export class TemplateItem {
         clickTemplateEvents,
         clickTemplateHandlers,
       ) {
+
         const getItemIdForEvent = ({ eventItem, key }) => {
           const depth = handlerDepthMap.get(key);
 
@@ -115,6 +116,7 @@ export class TemplateItem {
             });
 
             const handlerName = clickTemplateEvents[clickId];
+            
             clickTemplateHandlers[handlerName]({
               componentId: componentId,
             });

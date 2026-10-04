@@ -14,9 +14,7 @@ class DefaultUpdater {
       subscribers[i].updateFromSubscribedStores();
     }
     return storeUpdates;
-  }
-  
- 
+  } 
 }
 
 export class DataStore {
@@ -32,6 +30,7 @@ export class DataStore {
 
   #pendingFetch;
 
+  #presentationUpdater;
   #presentationUpdates = {};
   #presentationSignals = {};
   #presentationSubscribers = [];
@@ -42,7 +41,6 @@ export class DataStore {
 	#storeName;
 	#updateCallbacks = [];
 
-  #presentationUpdater;
 
   constructor(loadAction, storeName, updater = new DefaultUpdater()) {
 

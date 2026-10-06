@@ -14,11 +14,22 @@ export class ItemUpdater {
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
     let renderUpdates = {};
 
+    //Logic to support updating specific fields while making sure existing data
+    //for other fields is considered.
+    const stateToCompare = {};
+    Object.keys(prevStoreData).forEach((field)=>{
+      if(!storeUpdates.hasOwnProperty(field)){
+        stateToCompare[field] = prevStoreData[field];
+      }
+    });
+    Object.keys(storeUpdates).forEach((field)=>{
+      stateToCompare[field]=storeUpdates[field]; 
+    });
+
     for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {
       const fieldName = this.#topLevelUpdateFields[i];
       const updateData =
-        this.#presentationSignals.update[fieldName](storeUpdates);
-
+        this.#presentationSignals.update[fieldName](stateToCompare);
       if (!prevStoreData || updateData !== prevStoreData[fieldName]) {
         renderUpdates[fieldName] = updateData;
       }
@@ -29,6 +40,6 @@ export class ItemUpdater {
         subscribers[i].updateItem(renderUpdates);
       }
     }
-    return storeUpdates;
+    return stateToCompare;
   }
 }

@@ -192,7 +192,7 @@ export class DataStore {
   }
 
   updateStoreData(storeUpdates) {
-
+  
     let updates = storeUpdates;
     if(this.#presentationSubscribers.length >0){
       updates = this.#presentationUpdater.updateStoreData(

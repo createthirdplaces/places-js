@@ -186,8 +186,7 @@ export class PresentationComponent extends HTMLElement {
   #setupTemplate() {
 	
     let templateNode = this.querySelector("[data-template]");
-
-		
+	
 		if(!templateNode){
 			if(this.hasAttribute("data-template")){
 				templateNode = this;
@@ -198,8 +197,6 @@ export class PresentationComponent extends HTMLElement {
     if (!templateNode) {
       return;
     }
-
-    templateNode.style.visibility = "inherit";
 
     let templateHTML = templateNode.innerHTML;
 
@@ -218,8 +215,9 @@ export class PresentationComponent extends HTMLElement {
 
     this.#templateItem.setupClickEventHandlers(this.#clickTemplateEvents);
     this.#templateItem.setupChangeEventHandlers(this.#changeTemplateEvents);
-  }
 
+    this.setAttribute("is-template-setup","true");
+  }
 
   updateItem(state) {
 

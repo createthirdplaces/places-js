@@ -118,6 +118,7 @@ export class TemplateItem {
             const handlerName = clickTemplateEvents[clickId];
             
             clickTemplateHandlers[handlerName]({
+              eventData: e,
               componentId: componentId,
             });
           }

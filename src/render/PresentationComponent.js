@@ -198,6 +198,7 @@ export class PresentationComponent extends HTMLElement {
       return;
     }
 
+    templateNode.style.visibility = "inherit";
     let templateHTML = templateNode.innerHTML;
 
     templateNode.innerHTML = "";
@@ -224,7 +225,7 @@ export class PresentationComponent extends HTMLElement {
     if (!this.#templateItem) {
       this.#setupTemplate();
     }
- 
+
     const node = this.#templateItem.getFirstNode();
     const templateNode = this.#templateItem.getTemplateNode();
 

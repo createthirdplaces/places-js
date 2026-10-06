@@ -12,6 +12,7 @@ export class ItemUpdater {
 	}
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
+
     let renderUpdates = {};
 
     //Logic to support updating specific fields while making sure existing data

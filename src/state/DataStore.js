@@ -192,7 +192,7 @@ export class DataStore {
   }
 
   updateStoreData(storeUpdates) {
-  
+ 
     let updates = storeUpdates;
     if(this.#presentationSubscribers.length >0){
       updates = this.#presentationUpdater.updateStoreData(
@@ -210,9 +210,8 @@ export class DataStore {
       this.#storeData[field] = updates[field];
     });
 
-
 		for(let i=0; i < this.#updateCallbacks.length; i++){
-			this.#updateCallbacks[i](this.#storeData);
+			this.#updateCallbacks[i](structuredClone(this.#storeData));
 		}
   }
 
@@ -325,11 +324,9 @@ export class DataStore {
           }
 				});
 			}
-			
-			
+						
       return response;
     }
-
 
     const data = await Promise.resolve(this.#pendingFetch);
     return data; 

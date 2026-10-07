@@ -41,6 +41,7 @@ export class ItemUpdater {
         subscribers[i].updateItem(renderUpdates);
       }
     }
+
     return stateToCompare;
   }
 }

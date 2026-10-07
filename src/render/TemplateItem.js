@@ -58,8 +58,8 @@ export class TemplateItem {
         templateRoot.addEventListener("change", (e) => {
           const changeId =
             e.target.getAttribute("data-change-id") ||
-            e.target.parentNode.getAttribute("data-change-id") ||
-            e.target.parentNode.parentNode.getAttribute("data-change-id");
+            e.target.parentNode?.getAttribute("data-change-id") ||
+            e.target.parentNode?.parentNode.getAttribute("data-change-id");
           if (changeId) {
             const key = "data-click-id_" + changeId;
             const componentId = getItemIdForEvent({
@@ -105,8 +105,8 @@ export class TemplateItem {
         templateRoot.addEventListener("click", (e) => {
           const clickId =
             e.target.getAttribute("data-click-id") ||
-            e.target.parentNode.getAttribute("data-click-id") ||
-            e.target.parentNode.parentNode.getAttribute("data-click-id");
+            e.target.parentNode?.getAttribute("data-click-id") ||
+            e.target.parentNode?.parentNode.getAttribute("data-click-id");
 
           if (clickId) {
             const key = "data-click-id_" + clickId;

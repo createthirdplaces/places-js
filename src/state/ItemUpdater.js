@@ -36,6 +36,13 @@ export class ItemUpdater {
       }
     }
 
+    //Add non reactive fields.
+    Object.keys(storeUpdates).forEach((field)=>{
+      if(!renderUpdates[field]){
+        renderUpdates[field] = storeUpdates[field];
+      }
+    });
+
     if (Object.keys(storeUpdates).length > 0) {
       for (let i = 0; i < subscribers.length; i++) {
         subscribers[i].updateItem(renderUpdates);

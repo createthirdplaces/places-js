@@ -305,19 +305,23 @@ export class DataStore {
 				this.#dataStoreSubscribers.forEach((fieldName, subscriber)=>{
 
           const selector = this.#dataStoreSubscriberSelectors.get(subscriber);
+
+          let storeUpdate = structuredClone(response);
+
           if(selector){
-            response = selector(response);
+            storeUpdate = selector(storeUpdate);
           }
 
-          if(!response){
-            response = {};
+          if(!storeUpdate){
+            storeUpdate = {};
           }
+
           if(fieldName){
             subscriber.updateStoreData({
-              [fieldName]: structuredClone(response)
+              [fieldName]: storeUpdate
             });
           } else {
-            subscriber.updateStoreData(structuredClone(response));
+            subscriber.updateStoreData(storeUpdate);
           }
 				});
 			}

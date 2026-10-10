@@ -4,6 +4,26 @@ import { DataStoreSignal } from "./DataStoreSignal.js";
 import { ItemUpdater } from "./ItemUpdater.js";
 import { ListUpdater } from "./ListUpdater.js";
 
+//Initializer for stores that should wait for asnyc data before pushing update
+class EmptyInitializer {
+  initialize(store){
+    return;
+  }
+}
+
+class SynchronousInitializer {
+
+  #initialState;
+
+  constructor(state){
+    this.#initialState = state;
+  }
+
+  initialize(store){
+    store.updateStoreData(this.#initialState);
+  }
+}
+
 class DefaultUpdater {
   /**
    * Update data in the store and trigger a render of components subscribed to the store.
@@ -25,6 +45,7 @@ export class DataStore {
   #dataStoreSubscriberSelectors = new Map();
 
 	#fieldTypeMapping = {};
+  #initializer;
   #isLoading = false;
   #loadAction;
 
@@ -42,8 +63,9 @@ export class DataStore {
 	#updateCallbacks = [];
 
 
-  constructor(loadAction, storeName, updater = new DefaultUpdater()) {
+  constructor(loadAction, storeName, initializer,updater = new DefaultUpdater()) {
 
+    this.#initializer = initializer;
 		this.#storeName = storeName;
     this.#presentationSubscribers = [];
     this.#requestStoreId = `store-${DataStore.#storeCount}`;
@@ -95,17 +117,23 @@ export class DataStore {
         return new DataStore(
           new ApiLoadAction(queryConfig),
           storeName,
+          new EmptyInitializer(),
           new ListUpdater(presentationSignals),
         );
       } else {
         return new DataStore(
           new DataStoreSignal(queryConfig),
           storeName,
+          new EmptyInitializer(),
           new ItemUpdater(presentationSignals),
         );
       }
     }
-    return new DataStore(new ApiLoadAction(queryConfig), storeName);
+    return new DataStore(
+      new ApiLoadAction(queryConfig), 
+      storeName,
+      new EmptyInitializer()
+    );
   }
 
   static createWithDataStoreSignals({
@@ -130,23 +158,61 @@ export class DataStore {
         dataStore =  new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
+          new EmptyInitializer(),
           new ListUpdater(presentationSignals),
         );
       } else {
 				dataStore = new DataStore(
           new DataStoreSignal(storeSignals),
           storeName,
+          new EmptyInitializer(),
           new ItemUpdater(presentationSignals),
         );
       }
     } else {
-			dataStore = new DataStore(new DataStoreSignal(storeSignals), storeName);
+			dataStore = new DataStore(
+        new DataStoreSignal(storeSignals),
+        new EmptyInitializer(),
+        storeName);
 		}
 
 		for(let i =0; i < storeSignals.length; i++){
 			storeSignals[i].store.subscribeDataStore(dataStore, storeSignals[i].fieldName,storeSignals[i].selector);
 		}
 		return dataStore;
+  }
+
+  static createWithInitialState({initialState, storeName, presentationSignals}){
+    if (presentationSignals) {
+      let isArray = false;
+      Object.keys(presentationSignals).forEach((key) => {
+        if (key !== "update") {
+          isArray = true;
+        }
+      });
+
+      if (isArray) {
+        return new DataStore(
+          new CustomLoadSignal(()=>{}),
+          storeName,
+          new SynchronousInitializer(initialState),
+          new ListUpdater(presentationSignals),
+        );
+      } else {
+        return new DataStore(
+          new CustomLoadSignal(()=>{}),
+          storeName,
+          new SynchronousInitializer(initialState),
+          new ItemUpdater(presentationSignals),
+        );
+      }
+    }
+
+    return new DataStore(
+      new CustomLoadSignal(()=>{}),
+      storeName,
+      new SynchronousInitializer(initialState)
+    );
   }
 
   static createWithCustomLoadSignal({loadAction, storeName,presentationSignals}) {
@@ -163,17 +229,23 @@ export class DataStore {
         return new DataStore(
           new CustomLoadSignal(loadAction),
           storeName,
+          new EmptyInitializer(),
           new ListUpdater(presentationSignals),
         );
       } else {
         return new DataStore(
           new CustomLoadSignal(loadAction),
           storeName,
+          new EmptyInitializer(),
           new ItemUpdater(presentationSignals),
         );
       }
     }
-    return new DataStore(new CustomLoadSignal(loadAction), storeName);
+    return new DataStore(
+      new CustomLoadSignal(loadAction), 
+      storeName,
+      new EmptyInitializer()
+    );
   }
 
   /** * Returns store data.
@@ -187,12 +259,11 @@ export class DataStore {
     if (Object.keys(this.#presentationSignals).length > 0) {
       return this.#presentationUpdates;
     }
-
     return this.#storeData;
   }
 
   updateStoreData(storeUpdates) {
- 
+
     let updates = storeUpdates;
     if(this.#presentationSubscribers.length >0){
       updates = this.#presentationUpdater.updateStoreData(
@@ -350,6 +421,8 @@ export class DataStore {
 	}
 
   subscribeComponent(subscriber, loadingIndicatorStart) {	
+    
+
     if(!loadingIndicatorStart && this.#presentationSubscribers.length >0){
 			this.#presentationUpdater.updateWithState(subscriber,this.#storeData || {});
 		}
@@ -363,5 +436,8 @@ export class DataStore {
     }
 		
     this.#presentationSubscribers.push(subscriber);
+
+
+    this.#initializer.initialize(this);
   }
 }

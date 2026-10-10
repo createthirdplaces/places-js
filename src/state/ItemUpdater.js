@@ -29,6 +29,7 @@ export class ItemUpdater {
 
     for (let i = 0; i < this.#topLevelUpdateFields.length; i++) {
       const fieldName = this.#topLevelUpdateFields[i];
+
       const updateData =
         this.#presentationSignals.update[fieldName](stateToCompare);
       if (!prevStoreData || updateData !== prevStoreData[fieldName]) {
@@ -43,10 +44,8 @@ export class ItemUpdater {
       }
     });
 
-    if (Object.keys(storeUpdates).length > 0) {
-      for (let i = 0; i < subscribers.length; i++) {
-        subscribers[i].updateItem(renderUpdates);
-      }
+    for (let i = 0; i < subscribers.length; i++) {
+      subscribers[i].updateItem(renderUpdates);
     }
 
     return stateToCompare;

@@ -387,7 +387,8 @@ export class TemplateItem {
     template.innerHTML = htmlToAdd;
     this.#templateNode = template.content.firstChild;
     const handlerAttrs = ["data-click-id", "data-change-id"];
-		
+	
+    console.log(htmlToAdd);
     handlerAttrs.forEach((handlerAttr) => {
       const attrSelector = `[${handlerAttr}]`;
 

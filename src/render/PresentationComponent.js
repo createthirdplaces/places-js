@@ -102,6 +102,8 @@ export class PresentationComponent extends HTMLElement {
   
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
+    } else if (attr === "visibility"){
+      element.style.visibility = signalData[fieldName];
     }
     else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];
@@ -142,6 +144,9 @@ export class PresentationComponent extends HTMLElement {
 
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
+    }
+    else if (attr === "visibility"){
+      element.style.visibility = signalData[fieldName];
     }
     else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];

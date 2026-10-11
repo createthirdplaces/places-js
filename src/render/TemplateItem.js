@@ -388,7 +388,6 @@ export class TemplateItem {
     this.#templateNode = template.content.firstChild;
     const handlerAttrs = ["data-click-id", "data-change-id"];
 	
-    console.log(htmlToAdd);
     handlerAttrs.forEach((handlerAttr) => {
       const attrSelector = `[${handlerAttr}]`;
 
@@ -418,7 +417,7 @@ export class TemplateItem {
         let childNodePath = [];
         let node = template.content.querySelector(selector);
         let searchNode = node;
-
+        
         while (searchNode.parentNode.nodeName !== "#document-fragment") {
           for (let j = 0; j < searchNode.parentNode.childNodes.length; j++) {
             if (Object.is(searchNode.parentNode.childNodes[j], searchNode)) {

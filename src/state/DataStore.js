@@ -266,6 +266,7 @@ export class DataStore {
 
     let updates = storeUpdates;
     if(this.#presentationSubscribers.length >0){
+
       updates = this.#presentationUpdater.updateStoreData(
         storeUpdates,
         this.#presentationSubscribers,
@@ -375,7 +376,7 @@ export class DataStore {
 				this.#dataStoreSubscribers.forEach((fieldName, subscriber)=>{
 
           const selector = this.#dataStoreSubscriberSelectors.get(subscriber);
-
+          
           let storeUpdate = structuredClone(response);
 
           if(selector){
@@ -394,8 +395,7 @@ export class DataStore {
             subscriber.updateStoreData(storeUpdate);
           }
 				});
-			}
-						
+			}					
       return response;
     }
 
@@ -422,7 +422,6 @@ export class DataStore {
 
   subscribeComponent(subscriber, loadingIndicatorStart) {	
     
-
     if(!loadingIndicatorStart && this.#presentationSubscribers.length >0){
 			this.#presentationUpdater.updateWithState(subscriber,this.#storeData || {});
 		}
@@ -436,8 +435,6 @@ export class DataStore {
     }
 		
     this.#presentationSubscribers.push(subscriber);
-
-
     this.#initializer.initialize(this);
   }
 }

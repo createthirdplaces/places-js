@@ -242,10 +242,17 @@ export class TemplateItem {
           }
 
           if (j < sections.length - 1) {
-            templateAttrs.push({
-              attr: section.substring(spacePos + 1, equalPos),
-              fieldName: section.substring(equalPos + 3),
-            });
+            if(section.charAt(equalPos + 1) !== "\""){
+              templateAttrs.push({
+                attr: section.substring(spacePos + 1, equalPos),
+                fieldName: section.substring(equalPos + 2),
+              });
+            } else {
+              templateAttrs.push({
+                attr: section.substring(spacePos + 1, equalPos),
+                fieldName: section.substring(equalPos + 3),
+              });
+            }
           }
         }
 

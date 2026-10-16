@@ -1,5 +1,9 @@
 <html>
   <head>
+    <link  
+      rel="stylesheet"
+      href="styles/index.css"
+    />
     <script type="module">
 
       import  {TestRunner} from '/lib/TestRunner.js';
@@ -28,15 +32,16 @@
 
           testDOM.push(`
             <details open>
-              <summary>${test.constructor.name}</summary>
+              <summary class="test-file-name">${test.constructor.name}</summary>
               <presentation-component
                 data-store="${test.getName()}"  
               >
                 <ul data-template="testResults">
-                  <li>
-                    <h2>{name}</h2>
+                  <li class={isPass}>
+                    <span class="test-title">
+                        {name}
+                    </span>
                     <p>{message}</p>
-                    <p>{isPass}</p>
                   </li>
                 </ul>
               </presentation-component>

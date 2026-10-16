@@ -23,8 +23,6 @@ export class TemplateTests {
     assertEquals(signals[0].fieldName,"fieldA");
   }
 
-  //testValidationError
-
   testTemplate_staticTextChildNode_beforeReactiveField(){
     const templateItem = new TemplateItem(
       `
@@ -124,6 +122,65 @@ export class TemplateTests {
     assertEquals(signals[0].fieldName,"fieldA");
     assertEquals(signals[1].signalPath,":nth-child(1)>:nth-child(2)");
     assertEquals(signals[1].fieldName,"fieldB");
+  }
+
+  testTemplateWithThreeReactiveFieldsAndSpaceBetweenEach(){
+    
+    const templateItem = new TemplateItem(
+      `
+        <div>
+          <h2>{name}</h2>
+
+          <span>{fieldA}</span>
+
+          <span>{fieldB}</span>
+        </div>
+      `
+    )
+
+    const signals = templateItem.getAllSignals();
+    
+    assertEquals(signals.length,3);
+    
+    assertEquals(signals[0].signalPath,":nth-child(1)>:nth-child(1)");
+    assertEquals(signals[0].fieldName,"name");   
+    assertEquals(signals[1].signalPath,":nth-child(1)>:nth-child(2)");
+    assertEquals(signals[1].fieldName,"fieldA");
+    assertEquals(signals[2].signalPath,":nth-child(1)>:nth-child(3)");
+    assertEquals(signals[2].fieldName,"fieldB");
+  }
+
+
+  testTemplateWithThreeReactiveFieldsAndSpaceBetweenEach_AllOnOwnLines(){
+    
+    const templateItem = new TemplateItem(
+      `
+        <div>
+          <h2>
+            {name}
+          </h2>
+
+            <span>
+            {fieldA}
+          </span>
+
+          <span>
+            {fieldB}
+            </span>
+        </div>
+      `
+    )
+
+    const signals = templateItem.getAllSignals();
+    
+    assertEquals(signals.length,3);
+    
+    assertEquals(signals[0].signalPath,":nth-child(1)>:nth-child(1)");
+    assertEquals(signals[0].fieldName,"name");   
+    assertEquals(signals[1].signalPath,":nth-child(1)>:nth-child(2)");
+    assertEquals(signals[1].fieldName,"fieldA");
+    assertEquals(signals[2].signalPath,":nth-child(1)>:nth-child(3)");
+    assertEquals(signals[2].fieldName,"fieldB");
   }
 
   testTemplateWithTwoReactiveFields_depthOfTwo(){
@@ -243,28 +300,77 @@ export class TemplateTests {
 
     assertEquals(templateItem.getEventHandlerCount(),1);
 
+
+  }
+
+  testComplexTemplate_threeReactiveFields_oneEventExtraTabs(){
+    const templateItem = new TemplateItem(
+      `
+        <create-account-component
+          data-template
+        >
+          <div class="container-xl" id="login-component-container"> 
+            <h1>Create account</h1>
+            <form id="create-account-form" onsubmit="return false">
+              <div id="ui-input">
+                <div class="form-section">
+                  <label class="required-field" id="email">Email</label>
+                  <input id="username-input" type="email"/>
+                 </input>   
+                </div> 
+                <div class="form-section">
+                  <label class="required-field">Password</label>
+                  <input id="password-input" type="password"/>
+                  </input>
+                </div>
+
+                <div class="form-section">
+                  <label class="required-field">Confirm password</label>
+                  <input        
+                    id="confirm-password-input"
+                  />
+                      </input>          
+                </div> 
+              </div>
+ 
+              <span class="error-message">{error}</span>
+
+                  <span class={successStyle}>
+                {successMessage}
+              </span>
+
+              <div id="agree-rules-input">
+                <label for="agree-rules-checkbox">I agree to the site rules listed below</label>
+                <input type="checkbox" id="agree-rules-checkbox">         
+              </div>
+              <button id="create-account-button" onClick={createAccount} class="primary">Create account</button>
+              <button id="create-account-button-disabled" class="neutral">Create account</button>
+       
+              <site-rules-component></site-rules-component>
+              <faq-component></faq-component>
+            </form>
+          </div>
+        </create-account-component>
+      
+      `
+    );
+
+    const signals = templateItem.getAllSignals();
+  
+    assertEquals(signals.length,3,"Length not equal");  
+    
+    assertEquals(signals[0].signalPath,":nth-child(1)>:nth-child(1)>:nth-child(2)>:nth-child(2)");
+    assertEquals(signals[0].fieldName,"error"); 
+    
+    assertEquals(signals[1].signalPath,":nth-child(1)>:nth-child(1)>:nth-child(2)>:nth-child(3)");
+    assertEquals(signals[1].fieldName,"successStyle");
+    assertEquals(signals[2].signalPath,":nth-child(1)>:nth-child(1)>:nth-child(2)>:nth-child(3)");
+    assertEquals(signals[2].fieldName,"successMessage");
+    
+    assertEquals(templateItem.getEventHandlerCount(),1);
+
     const node = templateItem.getTemplateNode();
-    console.log(node);
-
-    node.querySelector(":nth-child(1)>:nth-child(1)").innerText="";
-
-    console.log(node.innerHTML);
 
   }
-
-  /*
-   TODO: Other test cases for verifying signal correctness. Keep adding until I find source of bug that
-   is causing parsing issues with edit profile template.
-
-   - Verify test cases related to string formatting
-
-   Note: Verify signal paths, and consider empty path to refer to simple teplate with a reactive top level element field
-   */
-
-  /*
-  testComplexTemplate(){
-    //Use edit profile template that is causing bug
-  }
-  */
 
 }

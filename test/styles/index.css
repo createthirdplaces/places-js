@@ -1,0 +1,24 @@
+li h2 {
+  display:inline-block;
+}
+
+.success::before {
+  content:"Pass: ";
+  color: green;  
+  font-weight: 600;
+}
+
+.fail::before {
+  content:"Fail: ";
+  color: red;  
+  font-weight: 600;
+  font-size:2rem;
+}
+
+.test-file-name {
+  font-size: 1.5rem;
+}
+
+.test-title {
+  font-weight: 600;
+}

@@ -187,11 +187,16 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 
 ## Contributing
 
+### Share feeedback
+
+Share feedback on Places.js by creating an issue or emailing gulu@createthirdplaces.org. One can also share feedback by commenting on an existing issue.
+### Code and website contributions
+
 Places.js is looking for help in the following areas.
 
 - Compatiblity with other tools. See [here](https://codeberg.org/createthirdplaces/places-js/issues?q=&type=all&sort=relevance&labels=2189466&state=open&milestone=0&project=0&assignee=0&poster=0) for libraries and frameworks that should be prioritized.
 - Documentation improvements.
-- Improving code quality and adressing bugs.
+- Improving JS code quality and adressing bugs.
 - Performance optimization.
 
 

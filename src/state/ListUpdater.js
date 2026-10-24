@@ -136,6 +136,7 @@ export class ListUpdater {
 
           if (hasChanged) {
             storeUpdates[field][i].prevStateIndex = i;
+            arrayChanges.push(storeUpdates[field][i]); 
           }
         }
         changeData.set(field, arrayChanges);

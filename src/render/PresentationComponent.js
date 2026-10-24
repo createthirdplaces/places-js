@@ -124,6 +124,7 @@ export class PresentationComponent extends HTMLElement {
 
     const { signalData, elementRoot } = params.updateData;
 
+    console.log("Hi");
     if (signalData[fieldName] === undefined) {
       return;
     }
@@ -137,6 +138,7 @@ export class PresentationComponent extends HTMLElement {
         element = elementRoot.querySelector(signalPath);
 
         this.#selectorCache.set(cacheId, element);
+        console.log("Query done");
       } else {
         element = this.#selectorCache.get(cacheId);
       }
@@ -145,6 +147,11 @@ export class PresentationComponent extends HTMLElement {
       element = elementRoot;
     }
 
+    if(element===null){
+      console.log("Null");
+      console.log(elementRoot.querySelector(":nth-child(1)"));
+    }
+    
     if (attr === "textcontent") {
       element.innerText = signalData[fieldName];
     }
@@ -157,7 +164,7 @@ export class PresentationComponent extends HTMLElement {
     else if (attr === "innerHTML") {
       element.innerHTML = signalData[fieldName];
     } else {
-
+      
       //Code is temporarily here for debugging.
       if(element === null || element === undefined){
         console.log("Null element");
@@ -197,10 +204,12 @@ export class PresentationComponent extends HTMLElement {
   #setupTemplate() {
 	
     let templateNode = this.querySelector("[data-template]");
-	
+
+    let innerTemplate = true;
 		if(!templateNode){
 			if(this.hasAttribute("data-template")){
 				templateNode = this;
+        innerTemplate = false;
 			}
 		}
 
@@ -213,7 +222,8 @@ export class PresentationComponent extends HTMLElement {
     let templateHTML = templateNode.innerHTML;
 
     templateNode.innerHTML = "";
-    this.#templateItem = new TemplateItem(templateHTML);
+
+    this.#templateItem = new TemplateItem(templateHTML,innerTemplate);
 
     templateNode.innerHTML = "";
     this.#templateItem.setTemplateRoot(templateNode);
@@ -403,7 +413,6 @@ export class PresentationComponent extends HTMLElement {
             elementRoot: this.#templateItem.getNode(id),
           },
         };
-
         this.#generateSignal(updateConfig);
       }
     }

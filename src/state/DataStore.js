@@ -5,7 +5,7 @@ import { ItemUpdater } from "./ItemUpdater.js";
 import { ListUpdater } from "./ListUpdater.js";
 
 //Initializer for stores that should wait for asnyc data before pushing update
-class EmptyInitializer {
+export class EmptyInitializer {
   initialize(store){
     return;
   }
@@ -263,12 +263,12 @@ export class DataStore {
   }
 
   updateStoreData(storeUpdates) {
-
+      
     let updates = storeUpdates;
     if(this.#presentationSubscribers.length >0){
 
       updates = this.#presentationUpdater.updateStoreData(
-        storeUpdates,
+        structuredClone(storeUpdates),
         this.#presentationSubscribers,
         this.#storeData || [],
       );
@@ -278,8 +278,8 @@ export class DataStore {
       this.#storeData = {};
     }
 
-    Object.keys(updates).forEach((field)=>{
-      this.#storeData[field] = updates[field];
+    Object.keys(storeUpdates).forEach((field)=>{
+      this.#storeData[field] = storeUpdates[field];
     });
 
 		for(let i=0; i < this.#updateCallbacks.length; i++){

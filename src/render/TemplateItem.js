@@ -20,8 +20,8 @@ export class TemplateItem {
     TemplateItem.#templateFunctions.set(name, templateFunction);
   }
 
-  constructor(html) {
-    this.#defineComponent(html);
+  constructor(html, innerTemplate) {
+    this.#defineComponent(html,innerTemplate);
   }
 
   #initSignalMap() { 
@@ -205,9 +205,10 @@ export class TemplateItem {
     return split.join("\n");
   }
 
-  #defineComponent(templateStr) {
+  #defineComponent(templateStr,innerTemplate) {
     templateStr = this.#evaluateConditional(templateStr);
 
+    console.log(innerTemplate);
     this.#changeTemplateEvents = [];
     this.#clickTemplateEvents = [];
 
@@ -434,8 +435,9 @@ export class TemplateItem {
           searchNode = searchNode.parentNode;
         }
 
-        childNodePath.push(":nth-child(1)");
-
+        if(!innerTemplate){
+          childNodePath.push(":nth-child(1)");
+        }
         childNodePath = childNodePath.reverse();
         node.attributes.removeNamedItem(signal.signalPath);
         signal.signalPath = childNodePath.join(">");

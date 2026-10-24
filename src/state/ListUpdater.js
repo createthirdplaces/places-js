@@ -90,10 +90,13 @@ export class ListUpdater {
         );
       }
 
-      if (!updatedOrdering || updatedOrdering.length === 0) {
+      if (!updatedOrdering || updatedOrdering.length === 0) { 
         this.#isClear = true;
+      } else {
+        this.#isClear = false;
       }
-
+    
+      
       this.#removeFromSubscribers(
         this.#removed,
         subscribers,
@@ -102,10 +105,13 @@ export class ListUpdater {
         field,
         updatedOrdering,
       );
-      this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
 
+      this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
+      
 
       if (!this.#isReplace && !this.#isClear) {
+
+        console.log("Moved");
         const arrayChanges = [];
 
         const reactiveData = this.#presentationSignals[field]["update"];
@@ -141,6 +147,7 @@ export class ListUpdater {
       }
     }
 
+    console.log(changeData);
     //Look at storeUpdates if changeData is empty
     if (changeData.size === 0 && !this.#isReplace) {
       changeData = new Map();
@@ -159,7 +166,7 @@ export class ListUpdater {
         subscribers[i].updateVisible(this.#updated);
       }
     }
-    
+   
     return storeUpdates;
   }
 
@@ -229,6 +236,8 @@ export class ListUpdater {
       }
 
       prevStoreData[field] = updatedPrev;
+
+
       storeUpdates[field] = updatedPrev;
       this.#prevOrdering[field] = updatedOrdering;
       for (let i = 0; i < subscribers.length; i++) {
@@ -242,7 +251,10 @@ export class ListUpdater {
   }
 
   #moveItems(updatedOrdering, subscribers, prevStoreData, field) {
+    
+    this.#moved = [];
     let sameNumber = false;
+
     if (
       !this.#isReplace &&
       updatedOrdering.length === this.#prevOrdering[field].length

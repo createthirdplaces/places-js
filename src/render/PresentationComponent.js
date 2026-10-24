@@ -124,7 +124,6 @@ export class PresentationComponent extends HTMLElement {
 
     const { signalData, elementRoot } = params.updateData;
 
-    console.log("Hi");
     if (signalData[fieldName] === undefined) {
       return;
     }
@@ -138,7 +137,6 @@ export class PresentationComponent extends HTMLElement {
         element = elementRoot.querySelector(signalPath);
 
         this.#selectorCache.set(cacheId, element);
-        console.log("Query done");
       } else {
         element = this.#selectorCache.get(cacheId);
       }

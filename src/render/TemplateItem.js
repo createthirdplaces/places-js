@@ -208,7 +208,6 @@ export class TemplateItem {
   #defineComponent(templateStr,innerTemplate) {
     templateStr = this.#evaluateConditional(templateStr);
 
-    console.log(innerTemplate);
     this.#changeTemplateEvents = [];
     this.#clickTemplateEvents = [];
 

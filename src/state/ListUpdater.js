@@ -107,11 +107,9 @@ export class ListUpdater {
       );
 
       this.#moveItems(updatedOrdering, subscribers, prevStoreData, field);
-      
-
+     
       if (!this.#isReplace && !this.#isClear) {
 
-        console.log("Moved");
         const arrayChanges = [];
 
         const reactiveData = this.#presentationSignals[field]["update"];
@@ -138,7 +136,6 @@ export class ListUpdater {
 
           if (hasChanged) {
             storeUpdates[field][i].prevStateIndex = i;
-            arrayChanges.push(storeUpdates[field][i]);
           }
         }
         changeData.set(field, arrayChanges);
@@ -147,7 +144,6 @@ export class ListUpdater {
       }
     }
 
-    console.log(changeData);
     //Look at storeUpdates if changeData is empty
     if (changeData.size === 0 && !this.#isReplace) {
       changeData = new Map();
@@ -276,9 +272,9 @@ export class ListUpdater {
 
           for (let a = 0; a < prevStoreData[field].length; a++) {
             const item = prevStoreData[field][a];
-
-            if (a + 1 === updatedOrdering[num]) {
-              if (!(updatedOrdering[num] === insertBefore - 1)) {
+ 
+            if (item.id === updatedOrdering[num]) {
+              if (!(updatedOrdering[num] === this.#prevOrdering[num])) {
                 swapUpdates.push({
                   updateIndex: num,
                   updateData: item,

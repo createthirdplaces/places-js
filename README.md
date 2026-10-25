@@ -15,7 +15,9 @@ Places.js is optimized for fast rendering. Performance benchmarking shows that P
 
 Download the places-js-latest.js file from the [jsDelivr
 CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
-or run `npx jsr add @createthirdplaces/places-js`
+or run `npx jsr add @createthirdplaces/places-js`.
+
+See the [reference guide](https://createthirdplaces.org/tech/placesjs/reference/presentationComponent.html) for a detailed guide on using Places.js.
 
 
 ## Examples
@@ -190,17 +192,19 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 ### Share feeedback
 
 Share feedback on Places.js by creating an issue or emailing gulu@createthirdplaces.org. One can also share feedback by commenting on an existing issue.
+
 ### Code and website contributions
 
-Places.js is looking for help in the following areas.
+Places.js is looking for help in the following areas. See the [the issues page](https://codeberg.org/createthirdplaces/places-js/issues) for more information
 
-- Compatiblity with other tools. See [here](https://codeberg.org/createthirdplaces/places-js/issues?q=&type=all&sort=relevance&labels=2189466&state=open&milestone=0&project=0&assignee=0&poster=0) for libraries and frameworks that should be prioritized.
-- Documentation improvements.
-- Improving JS code quality and adressing bugs.
-- Performance optimization.
+- Adding more unit test coverage.
+- Compatibility with other hypermedia UI tools including [Datastar](https://data-star.dev/) and [htmx](https://htmx.org/)
+- Implementing hypermedia controls.
+- Testing integration with [Leaflet](leafletjs.com) and other mapping libraries.
 
 
-Also, all Places.js contributions must be make by humans,and be designed for humans which includes code changes, comments, or new issues. This means no use of ChatGPT, Claude, or any other AI tool.
+
+Also, all Places.js contributions including code changes, comments, or new issues must be made by humans This means no use of ChatGPT, Claude, or any other AI tool.
 
 
 ## Creating a minified build

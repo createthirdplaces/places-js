@@ -14,7 +14,7 @@ Places.js is optimized for fast rendering. Performance benchmarking shows that P
 ## Getting started
 
 Download the places-js-latest.js file from the [jsDelivr
-CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.0/places-js-latest.js)
+CDN](https://cdn.jsdelivr.net/gh/createthirdplaces/places-js@0.1.1/places-js-latest.js)
 or run `npx jsr add @createthirdplaces/places-js`.
 
 See the [reference guide](https://createthirdplaces.org/tech/placesjs/reference/presentationComponent.html) for a detailed guide on using Places.js.

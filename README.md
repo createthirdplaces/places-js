@@ -100,33 +100,6 @@ export const SEARCH_RESULTS_STORE = DataStore.createWithApiLoadSignal({
 });
 ```
 
-### Component with conditional statement to show a different UI and a [Handlebars partial](https://handlebarsjs.com/guide/partials.html)
-
-```
-<search-component
-  api-url="/searchEvents"
-  data-store="search-component-store"
-  id="search-section"
->
-  <div data-template>
-      {#if isMobile}
-        <details open>
-          <summary class="btn secondary">Modify search parameters</summary>
-          <form id=${SEARCH_FORM_ID} onsubmit="return false">
-            {{>searchTemplate}}
-          </form>
-          </hr>
-        </details>
-      {else}
-        <form onsubmit="return false">
-          <h1>Search events</h1>
-          {{>searchTemplate}}
-        </form>
-      {/if}
-  </div>
-</search-component>
-```
-
 ### Dynamically adding Places.js components with JavaScript.
 
 ```

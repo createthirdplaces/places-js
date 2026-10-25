@@ -7,7 +7,7 @@ Places.js is a HTML-first progressive enhancement framework with these features.
 
 To ensure quality, all code is written by hand and reviewed by a human without AI assistance. 
 
-Places.js is optimized for fast rendering. P>
+Places.js is optimized for fast rendering.
 
 
 

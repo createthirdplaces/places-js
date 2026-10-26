@@ -268,7 +268,7 @@ export class DataStore {
     if(this.#presentationSubscribers.length >0){
 
       updates = this.#presentationUpdater.updateStoreData(
-        storeUpdates,
+        structuredClone(storeUpdates),
         this.#presentationSubscribers,
         this.#storeData || [],
       );

@@ -27,10 +27,9 @@ export class ListUpdater {
 	}
 
   updateStoreData(storeUpdates, subscribers, prevStoreData) {
-    let changeData = new Map();
+		let changeData = new Map();
 
     for (let i = 0; i < this.#listFields.length; i++) {
-
       const field = this.#listFields[i];
 
       if (!storeUpdates[field]) {
